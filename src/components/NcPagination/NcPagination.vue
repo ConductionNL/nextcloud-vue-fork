@@ -125,23 +125,43 @@ The pagination reads the custom properties below. None of them is set by default
 | `--pagination-page-link-background-color` | `transparent` |
 | `--pagination-page-link-border-color` | `transparent` |
 | `--pagination-page-link-border-radius` | `var(--border-radius-element)` |
+| `--pagination-page-link-min-block-size` | `var(--default-clickable-area)` |
+| `--pagination-page-link-min-inline-size` | `var(--default-clickable-area)` |
+| `--pagination-page-link-padding-block-start` | `1px` |
+| `--pagination-page-link-padding-block-end` | `0` |
+| `--pagination-page-link-padding-inline-start` | the button padding |
+| `--pagination-page-link-padding-inline-end` | the button padding |
+| `--pagination-page-link-font-family` | inherited |
+| `--pagination-page-link-font-size` | `var(--default-font-size)` |
+| `--pagination-page-link-font-weight` | `var(--font-weight-element, bold)` |
 | `--pagination-page-link-hover-color` | `--pagination-page-link-color` |
 | `--pagination-page-link-hover-background-color` | the tertiary button hover background |
 | `--pagination-page-link-hover-border-color` | `--pagination-page-link-border-color` |
 | `--pagination-page-link-current-color` | `var(--color-primary-element-text)` |
 | `--pagination-page-link-current-background-color` | `var(--color-primary-element)` |
 | `--pagination-page-link-current-border-color` | `var(--color-primary-element-hover)` |
+| `--pagination-page-link-current-font-weight` | `--pagination-page-link-font-weight` |
 | `--pagination-relative-link-color` | `var(--color-main-text)` |
 | `--pagination-relative-link-background-color` | `transparent` |
 | `--pagination-relative-link-border-color` | `transparent` |
 | `--pagination-relative-link-border-radius` | `var(--border-radius-element)` |
+| `--pagination-relative-link-min-block-size` | `var(--default-clickable-area)`, also its width |
+| `--pagination-relative-link-min-inline-size` | `--pagination-relative-link-min-block-size` |
+| `--pagination-relative-link-padding-block-start` | `1px` |
+| `--pagination-relative-link-padding-block-end` | `0` |
+| `--pagination-relative-link-padding-inline-start` | the button padding |
+| `--pagination-relative-link-padding-inline-end` | the button padding |
 | `--pagination-relative-link-hover-color` | `--pagination-relative-link-color` |
 | `--pagination-relative-link-hover-background-color` | the tertiary button hover background |
 | `--pagination-relative-link-hover-border-color` | `--pagination-relative-link-border-color` |
 | `--pagination-relative-link-disabled-color` | `--pagination-relative-link-color` |
 | `--pagination-relative-link-disabled-background-color` | `--pagination-relative-link-background-color` |
+| `--pagination-relative-link-disabled-opacity` | `0.5` |
+| `--pagination-relative-link-disabled-filter` | `saturate(0.7)` |
 
 Page links are the numbered pages, relative links the first, previous, next and last buttons.
+
+The disabled opacity and filter are the washed-out look of a disabled NcButton. NL Design System themes describe a disabled button with its colors alone, so set them to `1` and `none` when the disabled colors already say it.
 
 ```vue
 <template>
@@ -221,7 +241,7 @@ export default {
 						:class="$style.ncPagination__pageLink"
 						:aria-current="item === page ? 'page' : undefined"
 						:aria-label="t('Page {page}', { page: item })"
-						:variant="item === page ? 'primary' : 'tertiary'"
+						variant="tertiary"
 						@click="goToPage(item)">
 						{{ item }}
 					</NcButton>
@@ -450,7 +470,16 @@ function setPageSize(size: number | null) {
 // so an unset token renders exactly as a plain NcButton. The two ancestor classes
 // outrank NcButton's own scoped rules without `!important`.
 .ncPagination .ncPagination__nav {
+	// NcButton's label reads --font-weight-element; capture it here, as redeclaring
+	// it on the button with itself as the fallback would be a cycle
+	--pagination-default-font-weight: var(--font-weight-element, bold);
+
 	.ncPagination__relativeLink:global(.button-vue) {
+		// An icon-only NcButton is exactly --button-size wide, so the block size sets both
+		--button-size: var(--pagination-relative-link-min-block-size, var(--default-clickable-area));
+		min-width: var(--pagination-relative-link-min-inline-size, var(--button-size));
+		padding-block: var(--pagination-relative-link-padding-block-start, 1px) var(--pagination-relative-link-padding-block-end, 0);
+		padding-inline: var(--pagination-relative-link-padding-inline-start, var(--button-padding)) var(--pagination-relative-link-padding-inline-end, var(--button-padding));
 		color: var(--pagination-relative-link-color, var(--color-main-text));
 		background-color: var(--pagination-relative-link-background-color, transparent);
 		border-color: var(--pagination-relative-link-border-color, transparent);
@@ -470,10 +499,19 @@ function setPageSize(size: number | null) {
 		&:disabled {
 			color: var(--pagination-relative-link-disabled-color, var(--pagination-relative-link-color, var(--color-main-text)));
 			background-color: var(--pagination-relative-link-disabled-background-color, var(--pagination-relative-link-background-color, transparent));
+			opacity: var(--pagination-relative-link-disabled-opacity, 0.5);
+			filter: var(--pagination-relative-link-disabled-filter, saturate(0.7));
 		}
 	}
 
 	.ncPagination__pageLink:global(.button-vue) {
+		--font-weight-element: var(--pagination-page-link-font-weight, var(--pagination-default-font-weight));
+		min-width: var(--pagination-page-link-min-inline-size, var(--button-size));
+		min-height: var(--pagination-page-link-min-block-size, var(--button-size));
+		padding-block: var(--pagination-page-link-padding-block-start, 1px) var(--pagination-page-link-padding-block-end, 0);
+		padding-inline: var(--pagination-page-link-padding-inline-start, var(--button-padding)) var(--pagination-page-link-padding-inline-end, var(--button-padding));
+		font-family: var(--pagination-page-link-font-family, inherit);
+		font-size: var(--pagination-page-link-font-size, var(--default-font-size));
 		color: var(--pagination-page-link-color, var(--color-main-text));
 		background-color: var(--pagination-page-link-background-color, transparent);
 		border-color: var(--pagination-page-link-border-color, transparent);
@@ -490,7 +528,10 @@ function setPageSize(size: number | null) {
 			background-color: var(--pagination-page-link-hover-background-color, var(--color-background-hover));
 		}
 
+		// The current page is a tertiary NcButton painted here, not a primary one, so
+		// a theme that restyles every primary button cannot override these tokens
 		&[aria-current='page'] {
+			--font-weight-element: var(--pagination-page-link-current-font-weight, var(--pagination-page-link-font-weight, var(--pagination-default-font-weight)));
 			color: var(--pagination-page-link-current-color, var(--color-primary-element-text));
 			background-color: var(--pagination-page-link-current-background-color, var(--color-primary-element));
 			border-color: var(--pagination-page-link-current-border-color, var(--color-primary-element-hover));
