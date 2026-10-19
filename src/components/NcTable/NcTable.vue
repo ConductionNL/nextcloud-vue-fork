@@ -139,6 +139,74 @@ export default {
 }
 </script>
 ```
+
+### Exposed CSS Variables
+
+The table can be restyled with the CSS variables below, set on the table or on any of its parents, for example `body` to restyle every table at once. None of them is set by default, so until one is, the table looks as it does above. The names follow the table tokens of the NL Design System.
+
+| Variable | Description |
+|---|---|
+| `--table-background-color` | Background of the table. Defaults to `transparent`. |
+| `--table-header-background-color` | Background of the header row. Defaults to `transparent`. |
+| `--table-header-color` | Text color of the header cells. Defaults to `--color-text-maxcontrast`. |
+| `--table-header-border-block-end-color` | Color of the line under the header row. Defaults to `--color-border`. |
+| `--table-data-cell-color` | Text color of the cells. Defaults to `--color-main-text`. |
+| `--table-row-background-color` | Background of a row. Defaults to `transparent`. |
+| `--table-row-alternate-odd-background-color` | Background of the first, third and every other odd row, for striped rows. Defaults to `--table-row-background-color`. |
+| `--table-row-alternate-even-background-color` | Background of the even rows. Defaults to `--table-row-background-color`. |
+| `--table-row-border-block-end-color` | Color of the line under a row. Defaults to `--color-border`. |
+| `--table-row-hover-background-color` | Background of a hovered row. Defaults to `--color-background-hover`. |
+| `--table-row-hover-color` | Text color of a hovered row. Defaults to `--table-data-cell-color`. |
+| `--table-row-selected-background-color` | Background of a selected row. Defaults to `--color-primary-element-light`. |
+| `--table-row-selected-hover-background-color` | Background of a hovered selected row. Defaults to `--color-primary-element-light-hover`. |
+
+The two variables for selected rows have no counterpart in the NL Design System, which has no selectable rows.
+
+The example below sets every color it uses, so it does not depend on what is set further up the page.
+
+```vue
+<template>
+	<NcTable
+		caption="Opening hours"
+		class="striped-table"
+		:columns="columns"
+		:rows="rows" />
+</template>
+
+<script>
+export default {
+	data() {
+		return {
+			columns: [
+				{ key: 'day', label: 'Day' },
+				{ key: 'hours', label: 'Opening hours' },
+			],
+			rows: [
+				{ id: 1, day: 'Monday', hours: '09:00 to 17:00' },
+				{ id: 2, day: 'Tuesday', hours: '09:00 to 17:00' },
+				{ id: 3, day: 'Wednesday', hours: '09:00 to 20:00' },
+				{ id: 4, day: 'Thursday', hours: '09:00 to 17:00' },
+			],
+		}
+	},
+}
+</script>
+
+<style scoped>
+.striped-table {
+	--table-background-color: var(--color-main-background);
+	--table-header-background-color: var(--color-background-dark);
+	--table-header-color: var(--color-main-text);
+	--table-header-border-block-end-color: var(--color-border-dark);
+	--table-data-cell-color: var(--color-main-text);
+	--table-row-alternate-odd-background-color: var(--color-main-background);
+	--table-row-alternate-even-background-color: var(--color-background-hover);
+	--table-row-border-block-end-color: transparent;
+	--table-row-hover-background-color: var(--color-background-dark);
+	--table-row-hover-color: var(--color-main-text);
+}
+</style>
+```
 </docs>
 
 <template>
@@ -587,6 +655,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 .ncTable__table {
 	width: 100%;
 	border-collapse: collapse;
+	background-color: var(--table-background-color, transparent);
 }
 
 .ncTable__header,
@@ -602,13 +671,25 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 
 .ncTable__header {
 	height: var(--default-clickable-area);
-	color: var(--color-text-maxcontrast);
+	color: var(--table-header-color, var(--color-text-maxcontrast));
 	font-weight: normal;
 	white-space: nowrap;
 }
 
 .ncTable__cell {
 	height: var(--default-clickable-area);
+	color: var(--table-data-cell-color, var(--color-main-text));
+}
+
+// Theming: the header row and the body rows each read their own variables, and
+// every fallback is the value the table has without them
+.ncTable__table > thead > tr > th {
+	border-bottom-color: var(--table-header-border-block-end-color, var(--color-border));
+	background-color: var(--table-header-background-color, transparent);
+}
+
+.ncTable__table > tbody > tr > td {
+	border-bottom-color: var(--table-row-border-block-end-color, var(--color-border));
 }
 
 // A sortable header is an NcButton, like the sortable headers of the Files app.
@@ -621,7 +702,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 
 .ncTable__header .ncTable__sort:global(.button-vue) {
 	--button-padding: calc(2 * var(--default-grid-baseline)) var(--default-grid-baseline);
-	color: var(--color-text-maxcontrast);
+	color: var(--table-header-color, var(--color-text-maxcontrast));
 
 	&:hover:not(:disabled) {
 		color: var(--color-main-text);
@@ -641,16 +722,29 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 	text-align: end;
 }
 
+.ncTable__row > td {
+	background-color: var(--table-row-background-color, transparent);
+}
+
+.ncTable__row:nth-child(odd) > td {
+	background-color: var(--table-row-alternate-odd-background-color, var(--table-row-background-color, transparent));
+}
+
+.ncTable__row:nth-child(even) > td {
+	background-color: var(--table-row-alternate-even-background-color, var(--table-row-background-color, transparent));
+}
+
 .ncTable__row:hover > td {
-	background-color: var(--color-background-hover);
+	background-color: var(--table-row-hover-background-color, var(--color-background-hover));
+	color: var(--table-row-hover-color, var(--table-data-cell-color, var(--color-main-text)));
 }
 
-.ncTable__row_selected > td {
-	background-color: var(--color-primary-element-light);
+.ncTable__row.ncTable__row_selected > td {
+	background-color: var(--table-row-selected-background-color, var(--color-primary-element-light));
 }
 
-.ncTable__row_selected:hover > td {
-	background-color: var(--color-primary-element-light-hover);
+.ncTable__row.ncTable__row_selected:hover > td {
+	background-color: var(--table-row-selected-hover-background-color, var(--color-primary-element-light-hover));
 }
 
 .ncTable__state {
