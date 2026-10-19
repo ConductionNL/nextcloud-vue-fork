@@ -159,6 +159,19 @@ The table can be restyled with the CSS variables below, set on the table or on a
 | `--table-row-hover-color` | Text color of a hovered row. Defaults to `--table-data-cell-color`. |
 | `--table-row-selected-background-color` | Background of a selected row. Defaults to `--color-primary-element-light`. |
 | `--table-row-selected-hover-background-color` | Background of a hovered selected row. Defaults to `--color-primary-element-light-hover`. |
+| `--table-header-border-block-end-width` | Thickness of the line under the header row. Defaults to `1px`. |
+| `--table-row-border-block-end-width` | Thickness of the line under a row. Defaults to `1px`. |
+| `--table-cell-padding-block-start` | Padding above the content of a cell. Defaults to `--default-grid-baseline`. |
+| `--table-cell-padding-block-end` | Padding below the content of a cell. Defaults to `--default-grid-baseline`. |
+| `--table-cell-padding-inline-start` | Padding before the content of a cell. Defaults to two grid baselines. |
+| `--table-cell-padding-inline-end` | Padding after the content of a cell. Defaults to two grid baselines. |
+| `--table-font-family` | Font of the table. Inherited by default. |
+| `--table-font-size` | Font size of the table. Inherited by default. |
+| `--table-header-font-size` | Font size of the header cells. Defaults to `--table-font-size`. |
+| `--table-header-font-weight` | Font weight of the header cells. Defaults to `normal`. |
+| `--table-header-text-transform` | Text transform of the header cells, for example `uppercase`. Defaults to `none`. |
+| `--table-data-cell-font-size` | Font size of the cells. Defaults to `--table-font-size`. |
+| `--table-data-cell-font-weight` | Font weight of the cells. Inherited by default. |
 
 The two variables for selected rows have no counterpart in the NL Design System, which has no selectable rows.
 
@@ -656,14 +669,16 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 	width: 100%;
 	border-collapse: collapse;
 	background-color: var(--table-background-color, transparent);
+	font-family: var(--table-font-family, inherit);
+	font-size: var(--table-font-size, inherit);
 }
 
 .ncTable__header,
 .ncTable__cell,
 .ncTable__check,
 .ncTable__actions {
-	padding-block: var(--default-grid-baseline);
-	padding-inline: calc(2 * var(--default-grid-baseline));
+	padding-block: var(--table-cell-padding-block-start, var(--default-grid-baseline)) var(--table-cell-padding-block-end, var(--default-grid-baseline));
+	padding-inline: var(--table-cell-padding-inline-start, calc(2 * var(--default-grid-baseline))) var(--table-cell-padding-inline-end, calc(2 * var(--default-grid-baseline)));
 	border-bottom: 1px solid var(--color-border);
 	text-align: start;
 	vertical-align: middle;
@@ -672,36 +687,43 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 .ncTable__header {
 	height: var(--default-clickable-area);
 	color: var(--table-header-color, var(--color-text-maxcontrast));
-	font-weight: normal;
+	font-size: var(--table-header-font-size, inherit);
+	font-weight: var(--table-header-font-weight, normal);
+	text-transform: var(--table-header-text-transform, none);
 	white-space: nowrap;
 }
 
 .ncTable__cell {
 	height: var(--default-clickable-area);
 	color: var(--table-data-cell-color, var(--color-main-text));
+	font-size: var(--table-data-cell-font-size, inherit);
+	font-weight: var(--table-data-cell-font-weight, inherit);
 }
 
 // Theming: the header row and the body rows each read their own variables, and
 // every fallback is the value the table has without them
 .ncTable__table > thead > tr > th {
 	border-bottom-color: var(--table-header-border-block-end-color, var(--color-border));
+	border-bottom-width: var(--table-header-border-block-end-width, 1px);
 	background-color: var(--table-header-background-color, transparent);
 }
 
 .ncTable__table > tbody > tr > td {
 	border-bottom-color: var(--table-row-border-block-end-color, var(--color-border));
+	border-bottom-width: var(--table-row-border-block-end-width, 1px);
 }
 
 // A sortable header is an NcButton, like the sortable headers of the Files app.
 // The cell gives up its own padding to the button, so the label lines up with the
 // values below it, and the label keeps the weight and color of a plain header.
 .ncTable__header_sortable {
-	--font-weight-element: normal;
+	--font-weight-element: var(--table-header-font-weight, normal);
 	padding-inline: 0;
 }
 
 .ncTable__header .ncTable__sort:global(.button-vue) {
-	--button-padding: calc(2 * var(--default-grid-baseline)) var(--default-grid-baseline);
+	--button-padding: var(--table-cell-padding-inline-start, calc(2 * var(--default-grid-baseline))) var(--default-grid-baseline);
+	font-size: var(--table-header-font-size, var(--table-font-size, var(--default-font-size)));
 	color: var(--table-header-color, var(--color-text-maxcontrast));
 
 	&:hover:not(:disabled) {
