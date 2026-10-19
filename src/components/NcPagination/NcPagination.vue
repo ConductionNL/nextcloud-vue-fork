@@ -112,6 +112,67 @@ export default {
 }
 </script>
 ```
+
+### Theming
+
+The pagination reads the custom properties below. None of them is set by default: every fallback is the value the component uses without them, so an unset property changes nothing. Set them on the pagination or on any ancestor, for example `body`, to restyle every pagination at once. The names follow the structure of NL Design System pagination tokens.
+
+| Custom property | Default |
+|---|---|
+| `--pagination-gap` | `calc(2 * var(--default-grid-baseline))` |
+| `--pagination-ellipses-color` | `var(--color-text-maxcontrast)` |
+| `--pagination-page-link-color` | `var(--color-main-text)` |
+| `--pagination-page-link-background-color` | `transparent` |
+| `--pagination-page-link-border-color` | `transparent` |
+| `--pagination-page-link-border-radius` | `var(--border-radius-element)` |
+| `--pagination-page-link-hover-color` | `--pagination-page-link-color` |
+| `--pagination-page-link-hover-background-color` | the tertiary button hover background |
+| `--pagination-page-link-hover-border-color` | `--pagination-page-link-border-color` |
+| `--pagination-page-link-current-color` | `var(--color-primary-element-text)` |
+| `--pagination-page-link-current-background-color` | `var(--color-primary-element)` |
+| `--pagination-page-link-current-border-color` | `var(--color-primary-element-hover)` |
+| `--pagination-relative-link-color` | `var(--color-main-text)` |
+| `--pagination-relative-link-background-color` | `transparent` |
+| `--pagination-relative-link-border-color` | `transparent` |
+| `--pagination-relative-link-border-radius` | `var(--border-radius-element)` |
+| `--pagination-relative-link-hover-color` | `--pagination-relative-link-color` |
+| `--pagination-relative-link-hover-background-color` | the tertiary button hover background |
+| `--pagination-relative-link-hover-border-color` | `--pagination-relative-link-border-color` |
+| `--pagination-relative-link-disabled-color` | `--pagination-relative-link-color` |
+| `--pagination-relative-link-disabled-background-color` | `--pagination-relative-link-background-color` |
+
+Page links are the numbered pages, relative links the first, previous, next and last buttons.
+
+```vue
+<template>
+	<NcPagination
+		v-model:page="page"
+		class="themed-pagination"
+		:page-size="10"
+		:total-items="120" />
+</template>
+
+<script>
+export default {
+	data() {
+		return {
+			page: 3,
+		}
+	},
+}
+</script>
+
+<style scoped>
+.themed-pagination {
+	--pagination-page-link-border-radius: 0;
+	--pagination-page-link-border-color: var(--color-border-maxcontrast);
+	--pagination-page-link-current-background-color: var(--color-main-text);
+	--pagination-page-link-current-color: var(--color-main-background);
+	--pagination-page-link-current-border-color: var(--color-main-text);
+	--pagination-relative-link-color: var(--color-primary-element);
+}
+</style>
+```
 </docs>
 
 <template>
@@ -127,6 +188,7 @@ export default {
 				v-if="!compact"
 				:aria-label="t('First page')"
 				:title="t('First page')"
+				:class="$style.ncPagination__relativeLink"
 				:disabled="isFirstPage"
 				variant="tertiary"
 				@click="goToPage(1)">
@@ -137,6 +199,7 @@ export default {
 			<NcButton
 				:aria-label="t('Previous page')"
 				:title="t('Previous page')"
+				:class="$style.ncPagination__relativeLink"
 				:disabled="isFirstPage"
 				variant="tertiary"
 				@click="goToPage(page - 1)">
@@ -155,6 +218,7 @@ export default {
 					</span>
 					<NcButton
 						v-else
+						:class="$style.ncPagination__pageLink"
 						:aria-current="item === page ? 'page' : undefined"
 						:aria-label="t('Page {page}', { page: item })"
 						:variant="item === page ? 'primary' : 'tertiary'"
@@ -167,6 +231,7 @@ export default {
 			<NcButton
 				:aria-label="t('Next page')"
 				:title="t('Next page')"
+				:class="$style.ncPagination__relativeLink"
 				:disabled="isLastPage"
 				variant="tertiary"
 				@click="goToPage(page + 1)">
@@ -178,6 +243,7 @@ export default {
 				v-if="!compact"
 				:aria-label="t('Last page')"
 				:title="t('Last page')"
+				:class="$style.ncPagination__relativeLink"
 				:disabled="isLastPage"
 				variant="tertiary"
 				@click="goToPage(totalPages)">
@@ -355,13 +421,13 @@ function setPageSize(size: number | null) {
 	flex: 0 1 auto;
 	align-items: center;
 	justify-content: center;
-	gap: calc(2 * var(--default-grid-baseline));
+	gap: var(--pagination-gap, calc(2 * var(--default-grid-baseline)));
 }
 
 .ncPagination__pages {
 	display: flex;
 	align-items: center;
-	gap: calc(2 * var(--default-grid-baseline));
+	gap: var(--pagination-gap, calc(2 * var(--default-grid-baseline)));
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -376,8 +442,66 @@ function setPageSize(size: number | null) {
 .ncPagination__ellipsis {
 	display: inline-block;
 	min-width: var(--default-clickable-area);
-	color: var(--color-text-maxcontrast);
+	color: var(--pagination-ellipses-color, var(--color-text-maxcontrast));
 	text-align: center;
+}
+
+// Theming tokens on the NcButtons. Every fallback is the value NcButton itself uses,
+// so an unset token renders exactly as a plain NcButton. The two ancestor classes
+// outrank NcButton's own scoped rules without `!important`.
+.ncPagination .ncPagination__nav {
+	.ncPagination__relativeLink:global(.button-vue) {
+		color: var(--pagination-relative-link-color, var(--color-main-text));
+		background-color: var(--pagination-relative-link-background-color, transparent);
+		border-color: var(--pagination-relative-link-border-color, transparent);
+		// Corners only: NcButton derives its padding from --button-radius, so the token must not set that
+		border-radius: var(--pagination-relative-link-border-radius, var(--button-radius));
+
+		&:hover:not(:disabled) {
+			color: var(--pagination-relative-link-hover-color, var(--pagination-relative-link-color, var(--color-main-text)));
+			background-color: var(--pagination-relative-link-hover-background-color, color-mix(in srgb, var(--color-primary-element) 8%, transparent));
+			border-color: var(--pagination-relative-link-hover-border-color, var(--pagination-relative-link-border-color, transparent));
+		}
+
+		&:global(.button-vue--legacy34):hover:not(:disabled) {
+			background-color: var(--pagination-relative-link-hover-background-color, var(--color-background-hover));
+		}
+
+		&:disabled {
+			color: var(--pagination-relative-link-disabled-color, var(--pagination-relative-link-color, var(--color-main-text)));
+			background-color: var(--pagination-relative-link-disabled-background-color, var(--pagination-relative-link-background-color, transparent));
+		}
+	}
+
+	.ncPagination__pageLink:global(.button-vue) {
+		color: var(--pagination-page-link-color, var(--color-main-text));
+		background-color: var(--pagination-page-link-background-color, transparent);
+		border-color: var(--pagination-page-link-border-color, transparent);
+		// Corners only: NcButton derives its padding from --button-radius, so the token must not set that
+		border-radius: var(--pagination-page-link-border-radius, var(--button-radius));
+
+		&:hover:not(:disabled) {
+			color: var(--pagination-page-link-hover-color, var(--pagination-page-link-color, var(--color-main-text)));
+			background-color: var(--pagination-page-link-hover-background-color, color-mix(in srgb, var(--color-primary-element) 8%, transparent));
+			border-color: var(--pagination-page-link-hover-border-color, var(--pagination-page-link-border-color, transparent));
+		}
+
+		&:global(.button-vue--legacy34):hover:not(:disabled) {
+			background-color: var(--pagination-page-link-hover-background-color, var(--color-background-hover));
+		}
+
+		&[aria-current='page'] {
+			color: var(--pagination-page-link-current-color, var(--color-primary-element-text));
+			background-color: var(--pagination-page-link-current-background-color, var(--color-primary-element));
+			border-color: var(--pagination-page-link-current-border-color, var(--color-primary-element-hover));
+
+			&:hover:not(:disabled) {
+				color: var(--pagination-page-link-current-color, var(--color-primary-element-text));
+				background-color: var(--pagination-page-link-current-background-color, var(--color-primary-element-hover));
+				border-color: var(--pagination-page-link-current-border-color, var(--color-primary-element-hover));
+			}
+		}
+	}
 }
 
 // NcSelect sets a 260px min-width on `.nc-select.v-select.select`, too wide for a page size
