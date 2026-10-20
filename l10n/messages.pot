@@ -515,6 +515,9 @@ msgstr ""
 msgid "Select a tag"
 msgstr ""
 
+msgid "Select all rows"
+msgstr ""
+
 msgid "Select date"
 msgstr ""
 
@@ -525,6 +528,9 @@ msgid "Select month"
 msgstr ""
 
 msgid "Select provider"
+msgstr ""
+
+msgid "Select row"
 msgstr ""
 
 msgid "Select time"
