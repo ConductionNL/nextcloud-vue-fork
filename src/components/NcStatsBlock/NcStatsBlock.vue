@@ -139,6 +139,33 @@ export default {
 }
 </style>
 ```
+### Exposed CSS Variables
+
+| Variable | Description |
+|---|---|
+| `--stats-block-gap` | Space between the icon and the text. Defaults to four grid baselines. |
+| `--stats-block-padding` | Space around the statistic. Defaults to two grid baselines. |
+| `--stats-block-border-radius` | Corner radius of the hover background of a link. Defaults to `--border-radius-large`. |
+| `--stats-block-font-family` | Font of the statistic. Inherited by default. |
+| `--stats-block-hover-background-color` | Background of a link on hover. Defaults to `--color-background-hover`. |
+| `--stats-block-icon-size` | Size of the icon circle. Defaults to `44px`. |
+| `--stats-block-icon-border-radius` | Corner radius of the icon circle. Defaults to `50%`, a circle. |
+| `--stats-block-name-color` | Color of the name. Defaults to `--color-main-text`. |
+| `--stats-block-name-font-size` | Font size of the name. Inherited by default. |
+| `--stats-block-name-font-weight` | Font weight of the name. Defaults to bold. |
+| `--stats-block-value-font-family` | Font of the value. Inherited by default. |
+| `--stats-block-value-font-size` | Font size of the value. Defaults to `28px`. |
+| `--stats-block-value-font-weight` | Font weight of the value. Defaults to bold. |
+| `--stats-block-value-line-height` | Line height of the value. Defaults to `1.1`. |
+| `--stats-block-label-color` | Color of the label. Defaults to `--color-text-maxcontrast`. |
+| `--stats-block-label-font-size` | Font size of the label. Inherited by default. |
+| `--stats-block-primary-color` | Color of the icon and the value of the `primary` variant. Defaults to `--color-primary-element`. |
+| `--stats-block-info-color` | The same for the `info` variant. Defaults to the info text color. |
+| `--stats-block-success-color` | The same for the `success` variant. Defaults to the success text color. |
+| `--stats-block-warning-color` | The same for the `warning` variant. Defaults to the warning text color. |
+| `--stats-block-error-color` | The same for the `error` variant. Defaults to the error text color. |
+
+They can be set on the statistic or on any of its parents, for example `body` to restyle every statistic at once.
 </docs>
 
 <script setup lang="ts">
@@ -272,38 +299,39 @@ const formattedValue = computed(() => {
 
 <style lang="scss" module>
 .ncStatsBlock {
-	--stats-block-accent: var(--color-primary-element);
+	--stats-block-accent: var(--stats-block-primary-color, var(--color-primary-element));
 	display: flex;
 	align-items: center;
-	gap: calc(4 * var(--default-grid-baseline));
+	gap: var(--stats-block-gap, calc(4 * var(--default-grid-baseline)));
 	min-width: 0;
-	padding: calc(2 * var(--default-grid-baseline));
-	border-radius: var(--border-radius-large);
+	padding: var(--stats-block-padding, calc(2 * var(--default-grid-baseline)));
+	border-radius: var(--stats-block-border-radius, var(--border-radius-large));
 	color: var(--color-main-text);
+	font-family: var(--stats-block-font-family, inherit);
 	text-decoration: none;
 }
 
 .ncStatsBlock_info {
-	--stats-block-accent: var(--color-text-info, var(--color-info-text));
+	--stats-block-accent: var(--stats-block-info-color, var(--color-text-info, var(--color-info-text)));
 }
 
 .ncStatsBlock_success {
-	--stats-block-accent: var(--color-text-success, var(--color-success-text));
+	--stats-block-accent: var(--stats-block-success-color, var(--color-text-success, var(--color-success-text)));
 }
 
 .ncStatsBlock_warning {
-	--stats-block-accent: var(--color-text-warning, var(--color-warning-text));
+	--stats-block-accent: var(--stats-block-warning-color, var(--color-text-warning, var(--color-warning-text)));
 }
 
 .ncStatsBlock_error {
-	--stats-block-accent: var(--color-text-error, var(--color-error-text));
+	--stats-block-accent: var(--stats-block-error-color, var(--color-text-error, var(--color-error-text)));
 }
 
 .ncStatsBlock_link {
 	cursor: pointer;
 
 	&:hover {
-		background-color: var(--color-background-hover);
+		background-color: var(--stats-block-hover-background-color, var(--color-background-hover));
 	}
 
 	&:focus-visible {
@@ -317,9 +345,9 @@ const formattedValue = computed(() => {
 	flex-shrink: 0;
 	align-items: center;
 	justify-content: center;
-	width: 44px;
-	height: 44px;
-	border-radius: 50%;
+	width: var(--stats-block-icon-size, 44px);
+	height: var(--stats-block-icon-size, 44px);
+	border-radius: var(--stats-block-icon-border-radius, 50%);
 	color: var(--stats-block-accent);
 	background-color: color-mix(in srgb, var(--stats-block-accent) 12%, transparent);
 }
@@ -335,7 +363,9 @@ const formattedValue = computed(() => {
 .ncStatsBlock__name {
 	margin: 0;
 	overflow: hidden;
-	font-weight: bold;
+	color: var(--stats-block-name-color, inherit);
+	font-size: var(--stats-block-name-font-size, inherit);
+	font-weight: var(--stats-block-name-font-weight, bold);
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
@@ -352,16 +382,18 @@ const formattedValue = computed(() => {
 .ncStatsBlock__number {
 	flex: 0 0 auto;
 	color: var(--stats-block-accent);
-	font-size: 28px;
-	font-weight: bold;
-	line-height: 1.1;
+	font-family: var(--stats-block-value-font-family, inherit);
+	font-size: var(--stats-block-value-font-size, 28px);
+	font-weight: var(--stats-block-value-font-weight, bold);
+	line-height: var(--stats-block-value-line-height, 1.1);
 	white-space: nowrap;
 }
 
 .ncStatsBlock__label {
 	min-width: 0;
 	overflow: hidden;
-	color: var(--color-text-maxcontrast);
+	color: var(--stats-block-label-color, var(--color-text-maxcontrast));
+	font-size: var(--stats-block-label-font-size, inherit);
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
