@@ -12,7 +12,7 @@ The heading is an `h2` by default, because the Nextcloud page layout already has
 
 The actions wrap below the heading when there is not enough room next to it.
 
-### Default usage
+### Usage
 
 ```vue
 <template>

@@ -14,7 +14,7 @@ Long page ranges are shortened with ellipses, so at most seven page buttons are 
 
 When the page size is changed with the selector, the pagination goes back to the first page. When the number of items shrinks so that the current page no longer exists, it moves to the last page there is. While `total-items` is `0`, for example while the items are still loading, the current page is left as it is.
 
-### Default usage
+### Usage
 
 ```vue
 <template>
@@ -67,7 +67,7 @@ export default {
 
 ### Compact
 
-The compact layout only shows the visible item range and a previous / next pair. Use it where space is limited, for example in a dashboard widget or a sidebar.
+The compact layout only shows the visible item range and the previous and next buttons. Use it where space is limited, for example in a dashboard widget or a sidebar.
 
 ```vue
 <template>
@@ -160,50 +160,6 @@ The pagination can be restyled with the CSS variables below, set on the paginati
 | `--pagination-relative-link-disabled-filter` | Filter on a disabled relative link. Defaults to `saturate(0.7)`, like a disabled button. |
 
 A disabled relative link is washed out like a disabled button. When the disabled colors already show that it is disabled, set `--pagination-relative-link-disabled-opacity` to `1` and `--pagination-relative-link-disabled-filter` to `none`.
-
-The example below sets every color it uses, so it does not depend on what is set further up the page.
-
-```vue
-<template>
-	<NcPagination
-		v-model:page="page"
-		class="soft-pagination"
-		:page-size="10"
-		:total-items="120" />
-</template>
-
-<script>
-export default {
-	data() {
-		return {
-			page: 3,
-		}
-	},
-}
-</script>
-
-<style scoped>
-.soft-pagination {
-	--pagination-page-link-color: var(--color-main-text);
-	--pagination-page-link-background-color: transparent;
-	--pagination-page-link-border-color: transparent;
-	--pagination-page-link-border-radius: var(--border-radius-pill);
-	--pagination-page-link-hover-background-color: var(--color-background-hover);
-	--pagination-page-link-current-color: var(--color-primary-element-light-text);
-	--pagination-page-link-current-background-color: var(--color-primary-element-light);
-	--pagination-page-link-current-border-color: transparent;
-	--pagination-relative-link-color: var(--color-main-text);
-	--pagination-relative-link-background-color: transparent;
-	--pagination-relative-link-border-color: transparent;
-	--pagination-relative-link-border-radius: var(--border-radius-pill);
-	--pagination-relative-link-hover-background-color: var(--color-background-hover);
-	--pagination-relative-link-disabled-color: var(--color-text-maxcontrast);
-	--pagination-relative-link-disabled-background-color: transparent;
-	--pagination-relative-link-disabled-opacity: 1;
-	--pagination-relative-link-disabled-filter: none;
-}
-</style>
-```
 </docs>
 
 <template>
@@ -330,7 +286,7 @@ const props = withDefaults(defineProps<{
 	pageSizeOptions?: number[]
 
 	/**
-	 * Only show the visible item range and a previous / next pair,
+	 * Only show the visible item range and the previous and next buttons,
 	 * for places with limited space such as dashboard widgets.
 	 */
 	compact?: boolean

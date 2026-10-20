@@ -6,7 +6,7 @@
 <docs>
 ### General description
 
-This component renders a row of tabs and the panel of the selected tab, for switching between views of the same content in the app content, such as the details, the history and the comments of an item. For the tabs of the sidebar use `NcAppSidebarTab` instead.
+This component renders a row of tabs and the panel of the selected tab, for switching between views of the same content in the app content, such as the details, the history and the comments of an item. For the tabs of the sidebar, use `NcAppSidebarTab` instead.
 
 Pass the tabs in `tabs` and bind the selected tab's `id` with `v-model`. The content of a tab goes in the slot `panel-<id>`, for example `#panel-details`. Only the panel of the selected tab is rendered.
 
@@ -14,7 +14,7 @@ A tab can have an icon, a count shown in a counter bubble, and can be disabled. 
 
 The tabs look like the tabs of the sidebar: the icon above the name, and the tabs share the width of the row. When the tabs do not fit, the row scrolls horizontally.
 
-### Default usage
+### Usage
 
 ```vue
 <template>

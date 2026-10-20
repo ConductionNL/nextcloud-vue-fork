@@ -16,7 +16,7 @@ With `selectable`, every row gets a checkbox and the header a checkbox for all r
 
 Give every table a `caption`. It names the table for assistive technology and is not shown. When the table is wider than its container, it scrolls sideways and can be reached with the keyboard to do so.
 
-### Default usage
+### Usage
 
 ```vue
 <template>
@@ -174,52 +174,6 @@ The table can be restyled with the CSS variables below, set on the table or on a
 | `--table-data-cell-font-weight` | Font weight of the cells. Inherited by default. |
 
 The two variables for selected rows have no counterpart in the NL Design System, which has no selectable rows.
-
-The example below sets every color it uses, so it does not depend on what is set further up the page.
-
-```vue
-<template>
-	<NcTable
-		caption="Opening hours"
-		class="striped-table"
-		:columns="columns"
-		:rows="rows" />
-</template>
-
-<script>
-export default {
-	data() {
-		return {
-			columns: [
-				{ key: 'day', label: 'Day' },
-				{ key: 'hours', label: 'Opening hours' },
-			],
-			rows: [
-				{ id: 1, day: 'Monday', hours: '09:00 to 17:00' },
-				{ id: 2, day: 'Tuesday', hours: '09:00 to 17:00' },
-				{ id: 3, day: 'Wednesday', hours: '09:00 to 20:00' },
-				{ id: 4, day: 'Thursday', hours: '09:00 to 17:00' },
-			],
-		}
-	},
-}
-</script>
-
-<style scoped>
-.striped-table {
-	--table-background-color: var(--color-main-background);
-	--table-header-background-color: var(--color-background-dark);
-	--table-header-color: var(--color-main-text);
-	--table-header-border-block-end-color: var(--color-border-dark);
-	--table-data-cell-color: var(--color-main-text);
-	--table-row-alternate-odd-background-color: var(--color-main-background);
-	--table-row-alternate-even-background-color: var(--color-background-hover);
-	--table-row-border-block-end-color: transparent;
-	--table-row-hover-background-color: var(--color-background-dark);
-	--table-row-hover-color: var(--color-main-text);
-}
-</style>
-```
 </docs>
 
 <template>

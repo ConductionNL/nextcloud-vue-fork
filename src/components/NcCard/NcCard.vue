@@ -12,7 +12,7 @@ The heading is an `h3` by default, one level below the `h2` of a page header. Se
 
 With `href` or `to` the heading becomes a link that covers the whole card, so the whole card can be clicked, while it is announced to assistive technology as a single link with the name of the card. Buttons and other controls in the `actions` slot and the content stay clickable on their own. The `active` prop highlights a card, for example the selected one.
 
-### Default usage
+### Usage
 
 ```vue
 <template>

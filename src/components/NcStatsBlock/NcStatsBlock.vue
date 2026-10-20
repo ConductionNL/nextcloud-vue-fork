@@ -8,20 +8,20 @@
 
 This component renders a single statistic, such as a number of items on a dashboard: an optional icon in a tinted circle, the name of the statistic, its value in large type and an optional label next to the value.
 
-A number is formatted for the user's locale, so `1234` reads as `1,234` or `1.234`. Pass a string instead, for example `'€ 1,234'` or `'98 %'`, to show a value that is already formatted. Extra content, such as a short breakdown, can be put in the default slot below the value.
+A number is formatted for the user's locale, so `1234` reads as `1,234` or `1.234`. Pass a string instead, for example `'€1,234'` or `'98%'`, to show a value that is already formatted. Extra content, such as a short breakdown, can be put in the default slot below the value.
 
 The `variant` colors the icon and the value. With `href` or `to` the whole statistic becomes a link, for example to the list the number counts. While `loading` is set, a loading icon is shown instead of the value.
 
 The statistic draws no box of its own, so it fits into a card, a dashboard widget or a grid. Put several next to each other with a CSS grid or flexbox.
 
-### Default usage
+### Usage
 
 ```vue
 <template>
 	<div class="stats">
 		<NcStatsBlock name="Open cases" :value="42" />
 		<NcStatsBlock name="Documents" :value="12873" label="this year" :icon-path="mdiFileDocumentOutline" />
-		<NcStatsBlock name="Budget used" value="78 %" variant="warning" :icon-path="mdiCashMultiple" />
+		<NcStatsBlock name="Budget used" value="78%" variant="warning" :icon-path="mdiCashMultiple" />
 	</div>
 </template>
 
