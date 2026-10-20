@@ -112,6 +112,32 @@ export default {
 }
 </style>
 ```
+
+### Exposed CSS Variables
+
+| Variable | Description |
+|---|---|
+| `--card-background-color` | Background of the card. Defaults to `--color-main-background`. |
+| `--card-color` | Text color of the card. Defaults to `--color-main-text`. |
+| `--card-font-family` | Font of the card. Inherited by default. |
+| `--card-border-color` | Color of the border. Defaults to `--color-border`. |
+| `--card-border-width` | Width of the border. Defaults to `1px`. |
+| `--card-border-radius` | Corner radius of the card. Defaults to `--border-radius-large`. |
+| `--card-padding` | Space inside the card. Defaults to four grid baselines. |
+| `--card-gap` | Space between the parts of the card. Defaults to two grid baselines. |
+| `--card-hover-border-color` | Border color of a link card on hover. Defaults to `--color-border-maxcontrast`. |
+| `--card-hover-box-shadow` | Shadow of a link card on hover. Defaults to a small shadow. |
+| `--card-active-border-color` | Border color of an active card. Defaults to `--color-primary-element`. |
+| `--card-focus-outline-color` | Color of the focus outline of a link card. Defaults to `--color-main-text`. |
+| `--card-icon-color` | Color of the icon. Defaults to `--color-primary-element`. |
+| `--card-heading-color` | Color of the heading. Defaults to `--card-color`. |
+| `--card-heading-font-family` | Font of the heading. Inherited by default. |
+| `--card-heading-font-size` | Font size of the heading. Defaults to `--default-font-size`. |
+| `--card-heading-font-weight` | Font weight of the heading. Defaults to bold. |
+| `--card-heading-line-height` | Line height of the heading. Defaults to `1.5`. |
+| `--card-description-color` | Color of the description. Defaults to `--color-text-maxcontrast`. |
+
+They can be set on the card or on any of its parents, for example `body` to restyle every card at once.
 </docs>
 
 <script setup lang="ts">
@@ -245,35 +271,36 @@ const linkAttrs = computed(() => linkTag.value === 'RouterLink' ? { to: props.to
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	gap: calc(2 * var(--default-grid-baseline));
+	gap: var(--card-gap, calc(2 * var(--default-grid-baseline)));
 	min-width: 0;
-	padding: calc(4 * var(--default-grid-baseline));
-	border: 1px solid var(--color-border);
-	border-radius: var(--border-radius-large);
-	color: var(--color-main-text);
-	background-color: var(--color-main-background);
+	padding: var(--card-padding, calc(4 * var(--default-grid-baseline)));
+	border: var(--card-border-width, 1px) solid var(--card-border-color, var(--color-border));
+	border-radius: var(--card-border-radius, var(--border-radius-large));
+	color: var(--card-color, var(--color-main-text));
+	background-color: var(--card-background-color, var(--color-main-background));
+	font-family: var(--card-font-family, inherit);
 	transition: border-color var(--animation-quick), box-shadow var(--animation-quick);
 }
 
 .ncCard_link {
 	&:hover {
-		border-color: var(--color-border-maxcontrast);
-		box-shadow: 0 2px 8px var(--color-box-shadow);
+		border-color: var(--card-hover-border-color, var(--color-border-maxcontrast));
+		box-shadow: var(--card-hover-box-shadow, 0 2px 8px var(--color-box-shadow));
 	}
 
 	&:has(.ncCard__link:focus-visible) {
-		outline: 2px solid var(--color-main-text);
+		outline: 2px solid var(--card-focus-outline-color, var(--color-main-text));
 		outline-offset: 2px;
 	}
 }
 
 .ncCard_active {
-	border-color: var(--color-primary-element);
-	box-shadow: 0 0 0 1px var(--color-primary-element);
+	border-color: var(--card-active-border-color, var(--color-primary-element));
+	box-shadow: 0 0 0 1px var(--card-active-border-color, var(--color-primary-element));
 
 	&.ncCard_link:hover {
-		border-color: var(--color-primary-element);
-		box-shadow: 0 0 0 1px var(--color-primary-element), 0 2px 8px var(--color-box-shadow);
+		border-color: var(--card-active-border-color, var(--color-primary-element));
+		box-shadow: 0 0 0 1px var(--card-active-border-color, var(--color-primary-element)), var(--card-hover-box-shadow, 0 2px 8px var(--color-box-shadow));
 	}
 }
 
@@ -287,17 +314,18 @@ const linkAttrs = computed(() => linkTag.value === 'RouterLink' ? { to: props.to
 .ncCard__icon {
 	display: flex;
 	flex-shrink: 0;
-	color: var(--color-primary-element);
+	color: var(--card-icon-color, var(--color-primary-element));
 }
 
 .ncCard__name {
 	flex: 1 1 auto;
 	min-width: 0;
 	margin: 0;
-	color: var(--color-main-text);
-	font-size: var(--default-font-size);
-	font-weight: bold;
-	line-height: 1.5;
+	color: var(--card-heading-color, inherit);
+	font-family: var(--card-heading-font-family, inherit);
+	font-size: var(--card-heading-font-size, var(--default-font-size));
+	font-weight: var(--card-heading-font-weight, bold);
+	line-height: var(--card-heading-line-height, 1.5);
 	overflow-wrap: anywhere;
 }
 
@@ -337,7 +365,7 @@ const linkAttrs = computed(() => linkTag.value === 'RouterLink' ? { to: props.to
 
 .ncCard__description {
 	margin: 0;
-	color: var(--color-text-maxcontrast);
+	color: var(--card-description-color, var(--color-text-maxcontrast));
 }
 
 .ncCard__content {
