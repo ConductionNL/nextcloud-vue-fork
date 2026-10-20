@@ -112,6 +112,18 @@ export default {
 }
 </script>
 ```
+### Exposed CSS Variables
+
+| Variable | Description |
+|---|---|
+| `--chip-size` | Height of the chip, and the size of its icon. Set it on the chip itself. Defaults to `24px`, or `20px` when small. |
+| `--chip-border-radius` | Corner radius of the chip. Defaults to half of `--chip-size`, a pill. |
+| `--chip-font-family` | Font of the text. Inherited by default. |
+| `--chip-font-size` | Font size of the text. Inherited by default. |
+| `--chip-small-font-size` | Font size of the text of a small chip. Defaults to `--font-size-small`. |
+| `--chip-font-weight` | Font weight of the text. Inherited by default. |
+
+Except `--chip-size`, they can be set on the chip or on any of its parents, for example `body` to restyle every chip at once. The names follow the badge tokens of the NL Design System.
 </docs>
 
 <template>
@@ -280,8 +292,12 @@ const hasIcon = () => Boolean(props.iconPath || props.iconSvg || !!slots.icon)
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	border-radius: var(--chip-radius);
+	// The variables are read here so they can be set on any parent, for example by a theme
+	border-radius: var(--chip-border-radius, var(--chip-radius));
 	background-color: var(--color-background-hover);
+	font-family: var(--chip-font-family, inherit);
+	font-size: var(--chip-font-size, inherit);
+	font-weight: var(--chip-font-weight, inherit);
 
 	&--primary {
 		background-color: var(--color-primary-element);
@@ -315,7 +331,7 @@ const hasIcon = () => Boolean(props.iconPath || props.iconSvg || !!slots.icon)
 
 	&--small {
 		--chip-size: 20px;
-		font-size: var(--font-size-small);
+		font-size: var(--chip-small-font-size, var(--font-size-small));
 	}
 
 	// The status color mixed into the background, like NcNoteCard
