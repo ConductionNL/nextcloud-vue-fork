@@ -66,6 +66,23 @@ export default {
 	</NcPageHeader>
 </template>
 ```
+
+### Exposed CSS Variables
+
+| Variable | Description |
+|---|---|
+| `--page-header-gap` | Space between the icon, the text and the actions. Defaults to three grid baselines. |
+| `--page-header-margin-block-end` | Space below the header. Defaults to four grid baselines. |
+| `--page-header-icon-color` | Color of the icon. Defaults to `--color-primary-element`. |
+| `--page-header-heading-color` | Color of the heading. Defaults to `--color-main-text`. |
+| `--page-header-heading-font-family` | Font of the heading. Inherited by default. |
+| `--page-header-heading-font-size` | Font size of the heading. Defaults to `30px`. |
+| `--page-header-heading-font-weight` | Font weight of the heading. Defaults to `600`. |
+| `--page-header-heading-line-height` | Line height of the heading. Defaults to `1.5`. |
+| `--page-header-description-color` | Color of the description. Defaults to `--color-text-maxcontrast`. |
+| `--page-header-description-font-size` | Font size of the description. Inherited by default. |
+
+They can be set on the header or on any of its parents, for example `body` to restyle every page header at once. The names follow the heading and paragraph tokens of the NL Design System.
 </docs>
 
 <script setup lang="ts">
@@ -143,8 +160,8 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 	display: flex;
 	flex-wrap: wrap;
 	align-items: flex-start;
-	gap: calc(3 * var(--default-grid-baseline));
-	margin-block-end: calc(4 * var(--default-grid-baseline));
+	gap: var(--page-header-gap, calc(3 * var(--default-grid-baseline)));
+	margin-block-end: var(--page-header-margin-block-end, calc(4 * var(--default-grid-baseline)));
 }
 
 .ncPageHeader__icon {
@@ -153,7 +170,7 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 	align-items: center;
 	justify-content: center;
 	min-height: var(--default-clickable-area);
-	color: var(--color-primary-element);
+	color: var(--page-header-icon-color, var(--color-primary-element));
 }
 
 .ncPageHeader__text {
@@ -164,16 +181,18 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 
 .ncPageHeader__heading {
 	margin: 0;
-	color: var(--color-main-text);
-	font-size: 30px;
-	font-weight: 600;
-	line-height: 1.5;
+	color: var(--page-header-heading-color, var(--color-main-text));
+	font-family: var(--page-header-heading-font-family, inherit);
+	font-size: var(--page-header-heading-font-size, 30px);
+	font-weight: var(--page-header-heading-font-weight, 600);
+	line-height: var(--page-header-heading-line-height, 1.5);
 	overflow-wrap: anywhere;
 }
 
 .ncPageHeader__description {
 	margin: var(--default-grid-baseline) 0 0;
-	color: var(--color-text-maxcontrast);
+	color: var(--page-header-description-color, var(--color-text-maxcontrast));
+	font-size: var(--page-header-description-font-size, inherit);
 }
 
 .ncPageHeader__actions {
