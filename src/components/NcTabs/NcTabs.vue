@@ -82,6 +82,32 @@ export default {
 }
 </script>
 ```
+
+### Exposed CSS Variables
+
+| Variable | Description |
+|---|---|
+| `--tabs-gap` | Space between the tabs. Defaults to one grid baseline. |
+| `--tabs-border-block-end-color` | Color of the line below the tabs. Defaults to `--color-border`. |
+| `--tabs-border-block-end-width` | Width of the line below the tabs. Defaults to `1px`. |
+| `--tabs-tab-padding-block` | Space above and below the content of a tab. Defaults to one grid baseline. |
+| `--tabs-tab-padding-inline` | Space before and after the content of a tab. Defaults to three grid baselines. |
+| `--tabs-tab-border-radius` | Corner radius of a tab. Defaults to `--border-radius-element`. |
+| `--tabs-tab-color` | Text color of a tab. Defaults to `--color-main-text`. |
+| `--tabs-tab-font-family` | Font of a tab. Inherited by default. |
+| `--tabs-tab-font-size` | Font size of a tab. Defaults to `--default-font-size`. |
+| `--tabs-tab-font-weight` | Font weight of a tab. Defaults to `--font-weight-element`. |
+| `--tabs-tab-hover-background-color` | Background of a tab on hover. Defaults to `--color-background-hover`. |
+| `--tabs-tab-selected-color` | Text color of the selected tab. Defaults to `--tabs-tab-color`. |
+| `--tabs-tab-selected-background-color` | Background of the selected tab. Defaults to a light tint of `--color-primary-element`. |
+| `--tabs-tab-selected-font-weight` | Font weight of the selected tab. Defaults to `--tabs-tab-font-weight`. |
+| `--tabs-indicator-color` | Color of the bar below the selected tab. Defaults to `--color-primary-element`. |
+| `--tabs-indicator-height` | Height of the bar below the selected tab. Defaults to `4px`. |
+| `--tabs-indicator-border-radius` | Corner radius of the bar below the selected tab. Defaults to a pill. |
+| `--tabs-focus-outline-color` | Color of the focus outline of a tab and the panel. Defaults to `--color-main-text`. |
+| `--tabs-panel-padding-block` | Space above and below the panel. Defaults to three grid baselines. |
+
+They can be set on the tabs or on any of its parents, for example `body` to restyle all tabs at once.
 </docs>
 
 <script setup lang="ts">
@@ -281,10 +307,10 @@ function tabClass(tab: NcTabsTab) {
 
 .ncTabs__list {
 	display: flex;
-	gap: var(--default-grid-baseline);
+	gap: var(--tabs-gap, var(--default-grid-baseline));
 	padding-block: var(--default-grid-baseline);
 	overflow-x: auto;
-	border-block-end: 1px solid var(--color-border);
+	border-block-end: var(--tabs-border-block-end-width, 1px) solid var(--tabs-border-block-end-color, var(--color-border));
 	scrollbar-width: thin;
 }
 
@@ -296,12 +322,14 @@ function tabClass(tab: NcTabsTab) {
 	gap: calc(2 * var(--default-grid-baseline));
 	min-height: var(--default-clickable-area);
 	margin: 0;
-	padding: var(--default-grid-baseline) calc(3 * var(--default-grid-baseline));
+	padding-block: var(--tabs-tab-padding-block, var(--default-grid-baseline));
+	padding-inline: var(--tabs-tab-padding-inline, calc(3 * var(--default-grid-baseline)));
 	border: none;
-	border-radius: var(--border-radius-element);
-	color: var(--color-main-text);
+	border-radius: var(--tabs-tab-border-radius, var(--border-radius-element));
+	color: var(--tabs-tab-color, var(--color-main-text));
 	background-color: transparent;
-	font-size: var(--default-font-size);
+	font-family: var(--tabs-tab-font-family, inherit);
+	font-size: var(--tabs-tab-font-size, var(--default-font-size));
 	cursor: pointer;
 	transition: background-color var(--animation-quick);
 
@@ -310,19 +338,19 @@ function tabClass(tab: NcTabsTab) {
 		position: absolute;
 		inset-block-end: calc(-1 * var(--default-grid-baseline));
 		inset-inline: 50%;
-		height: 4px;
-		border-radius: 999px;
-		background-color: var(--color-primary-element);
+		height: var(--tabs-indicator-height, 4px);
+		border-radius: var(--tabs-indicator-border-radius, 999px);
+		background-color: var(--tabs-indicator-color, var(--color-primary-element));
 		opacity: 0;
 		transition: inset-inline var(--animation-quick), opacity var(--animation-quick);
 	}
 
 	&:hover:not(:disabled) {
-		background-color: var(--color-background-hover);
+		background-color: var(--tabs-tab-hover-background-color, var(--color-background-hover));
 	}
 
 	&:focus-visible {
-		outline: 2px solid var(--color-main-text);
+		outline: 2px solid var(--tabs-focus-outline-color, var(--color-main-text));
 		outline-offset: -2px;
 	}
 
@@ -333,11 +361,12 @@ function tabClass(tab: NcTabsTab) {
 }
 
 .ncTabs__tab_selected {
+	color: var(--tabs-tab-selected-color, var(--tabs-tab-color, var(--color-main-text)));
 	cursor: default;
 
 	&,
 	&:hover:not(:disabled) {
-		background-color: color-mix(in srgb, var(--color-primary-element) 8%, transparent);
+		background-color: var(--tabs-tab-selected-background-color, color-mix(in srgb, var(--color-primary-element) 8%, transparent));
 	}
 
 	&::after {
@@ -346,18 +375,22 @@ function tabClass(tab: NcTabsTab) {
 	}
 }
 
+.ncTabs__tab_selected .ncTabs__name {
+	font-weight: var(--tabs-tab-selected-font-weight, var(--tabs-tab-font-weight, var(--font-weight-element, normal)));
+}
+
 .ncTabs__name {
 	overflow: hidden;
-	font-weight: var(--font-weight-element, normal);
+	font-weight: var(--tabs-tab-font-weight, var(--font-weight-element, normal));
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
 .ncTabs__panel {
-	padding-block: calc(3 * var(--default-grid-baseline));
+	padding-block: var(--tabs-panel-padding-block, calc(3 * var(--default-grid-baseline)));
 
 	&:focus-visible {
-		outline: 2px solid var(--color-main-text);
+		outline: 2px solid var(--tabs-focus-outline-color, var(--color-main-text));
 		outline-offset: 2px;
 	}
 }
