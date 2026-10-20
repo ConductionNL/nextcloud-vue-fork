@@ -99,6 +99,22 @@ module.exports = async () => {
 				usageMode: 'hide',
 			},
 			{
+				// Preview branch only (preview/all-components): the Conduction components
+				// in one place for review. They also stay in their usual place under Components.
+				name: 'Conduction components',
+				content: 'docs/conduction-components.md',
+				sectionDepth: 1,
+				components: [
+					'src/components/NcCard/NcCard.vue',
+					'src/components/NcChip/NcChip.vue',
+					'src/components/NcPageHeader/NcPageHeader.vue',
+					'src/components/NcPagination/NcPagination.vue',
+					'src/components/NcStatsBlock/NcStatsBlock.vue',
+					'src/components/NcTable/NcTable.vue',
+					'src/components/NcTabs/NcTabs.vue',
+				],
+			},
+			{
 				name: 'Versions',
 				sections: [
 					{
