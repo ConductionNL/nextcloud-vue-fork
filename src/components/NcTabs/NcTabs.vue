@@ -10,7 +10,9 @@ This component renders a row of tabs and the panel of the selected tab, for swit
 
 Pass the tabs in `tabs` and bind the selected tab's `id` with `v-model`. The content of a tab goes in the slot `panel-<id>`, for example `#panel-details`. Only the panel of the selected tab is rendered.
 
-A tab can have an icon, a count shown in a counter bubble, and can be disabled. The tabs follow the [ARIA tabs pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/): the arrow keys move between the tabs and select them, `Home` and `End` go to the first and last tab, and `Tab` moves on into the panel. When the tabs do not fit, the row scrolls horizontally.
+A tab can have an icon, a count shown in a counter bubble, and can be disabled. The tabs follow the [ARIA tabs pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/): the arrow keys move between the tabs and select them, `Home` and `End` go to the first and last tab, and `Tab` moves on into the panel.
+
+The tabs look like the tabs of the sidebar: the icon above the name, and the tabs share the width of the row. When the tabs do not fit, the row scrolls horizontally.
 
 ### Default usage
 
@@ -90,10 +92,13 @@ export default {
 | `--tabs-gap` | Space between the tabs. Defaults to one grid baseline. |
 | `--tabs-border-block-end-color` | Color of the line below the tabs. Defaults to `--color-border`. |
 | `--tabs-border-block-end-width` | Width of the line below the tabs. Defaults to `1px`. |
-| `--tabs-tab-padding-block` | Space above and below the content of a tab. Defaults to one grid baseline. |
-| `--tabs-tab-padding-inline` | Space before and after the content of a tab. Defaults to three grid baselines. |
+| `--tabs-tab-flex` | How a tab shares the width of the row. Defaults to `1 1 1px`, equal shares; set `0 0 auto` to make each tab as wide as its content. |
+| `--tabs-tab-direction` | Whether the icon is above the name (`column`, the default) or before it (`row`). |
+| `--tabs-tab-padding` | Space around the content of a tab. Defaults to one grid baseline. |
+| `--tabs-tab-padding-block-end` | Space below the content of a tab, above the selection bar. Defaults to two grid baselines. |
 | `--tabs-tab-border-radius` | Corner radius of a tab. Defaults to `--border-radius-element`. |
 | `--tabs-tab-color` | Text color of a tab. Defaults to `--color-main-text`. |
+| `--tabs-tab-background-color` | Background of a tab. Defaults to `--color-main-background`. |
 | `--tabs-tab-font-family` | Font of a tab. Inherited by default. |
 | `--tabs-tab-font-size` | Font size of a tab. Defaults to `--default-font-size`. |
 | `--tabs-tab-font-weight` | Font weight of a tab. Defaults to `--font-weight-element`. |
@@ -107,7 +112,7 @@ export default {
 | `--tabs-focus-outline-color` | Color of the focus outline of a tab and the panel. Defaults to `--color-main-text`. |
 | `--tabs-panel-padding-block` | Space above and below the panel. Defaults to three grid baselines. |
 
-They can be set on the tabs or on any of its parents, for example `body` to restyle all tabs at once.
+They can be set on the tabs or on any of its parents, for example `body` to restyle all tabs at once. On Nextcloud before 34 the tabs take the older look of the sidebar tabs there, a line below the selected tab, which takes `--tabs-indicator-color`.
 </docs>
 
 <script setup lang="ts">
@@ -115,6 +120,7 @@ import type { Slot } from 'vue'
 
 import { computed, nextTick, ref, useCssModule } from 'vue'
 import { createElementId } from '../../utils/createElementId.ts'
+import { isLegacy34 } from '../../utils/legacy.ts'
 import { isRtl } from '../../utils/rtl.ts'
 import NcCounterBubble from '../NcCounterBubble/index.ts'
 import NcIconSvgWrapper from '../NcIconSvgWrapper/index.ts'
@@ -253,7 +259,10 @@ function onKeydown(event: KeyboardEvent) {
  * @param tab - The tab
  */
 function tabClass(tab: NcTabsTab) {
-	return [style.ncTabs__tab, { [style.ncTabs__tab_selected]: tab === activeTab.value }]
+	return [style.ncTabs__tab, {
+		[style.ncTabs__tab_selected]: tab === activeTab.value,
+		[style.ncTabs__tab_legacy]: isLegacy34,
+	}]
 }
 </script>
 
@@ -262,7 +271,7 @@ function tabClass(tab: NcTabsTab) {
 		<div
 			role="tablist"
 			:aria-label="ariaLabel"
-			:class="$style.ncTabs__list"
+			:class="[$style.ncTabs__list, { [$style.ncTabs__list_legacy]: isLegacy34 }]"
 			@keydown="onKeydown">
 			<button
 				v-for="tab in tabs"
@@ -279,10 +288,12 @@ function tabClass(tab: NcTabsTab) {
 				:disabled="tab.disabled"
 				@click="select(tab)">
 				<NcIconSvgWrapper v-if="tab.iconPath" :path="tab.iconPath" :size="20" />
-				<span :class="$style.ncTabs__name">{{ tab.name }}</span>
-				<NcCounterBubble
-					v-if="tab.count !== undefined"
-					:count="tab.count" />
+				<span :class="$style.ncTabs__label">
+					<span :class="$style.ncTabs__name">{{ tab.name }}</span>
+					<NcCounterBubble
+						v-if="tab.count !== undefined"
+						:count="tab.count" />
+				</span>
 			</button>
 		</div>
 		<div
@@ -305,29 +316,38 @@ function tabClass(tab: NcTabsTab) {
 	min-width: 0;
 }
 
+// The same look as the tabs of the sidebar (NcAppSidebarTabsButton)
 .ncTabs__list {
 	display: flex;
 	gap: var(--tabs-gap, var(--default-grid-baseline));
-	padding-block: var(--default-grid-baseline);
+	padding-block-end: var(--default-grid-baseline);
 	overflow-x: auto;
 	border-block-end: var(--tabs-border-block-end-width, 1px) solid var(--tabs-border-block-end-color, var(--color-border));
 	scrollbar-width: thin;
 }
 
+.ncTabs__list_legacy {
+	gap: 0;
+	padding-block-end: 0;
+}
+
 .ncTabs__tab {
 	position: relative;
 	display: flex;
-	flex: 0 0 auto;
+	flex: var(--tabs-tab-flex, 1 1 1px);
+	flex-direction: var(--tabs-tab-direction, column);
 	align-items: center;
-	gap: calc(2 * var(--default-grid-baseline));
+	justify-content: center;
+	gap: var(--default-grid-baseline);
+	min-width: max-content;
 	min-height: var(--default-clickable-area);
 	margin: 0;
-	padding-block: var(--tabs-tab-padding-block, var(--default-grid-baseline));
-	padding-inline: var(--tabs-tab-padding-inline, calc(3 * var(--default-grid-baseline)));
+	padding: var(--tabs-tab-padding, var(--default-grid-baseline));
+	padding-block-end: var(--tabs-tab-padding-block-end, calc(2 * var(--default-grid-baseline)));
 	border: none;
 	border-radius: var(--tabs-tab-border-radius, var(--border-radius-element));
 	color: var(--tabs-tab-color, var(--color-main-text));
-	background-color: transparent;
+	background-color: var(--tabs-tab-background-color, var(--color-main-background));
 	font-family: var(--tabs-tab-font-family, inherit);
 	font-size: var(--tabs-tab-font-size, var(--default-font-size));
 	cursor: pointer;
@@ -336,7 +356,7 @@ function tabClass(tab: NcTabsTab) {
 	&::after {
 		content: '';
 		position: absolute;
-		inset-block-end: calc(-1 * var(--default-grid-baseline));
+		inset-block-end: 0;
 		inset-inline: 50%;
 		height: var(--tabs-indicator-height, 4px);
 		border-radius: var(--tabs-indicator-border-radius, 999px);
@@ -351,7 +371,7 @@ function tabClass(tab: NcTabsTab) {
 
 	&:focus-visible {
 		outline: 2px solid var(--tabs-focus-outline-color, var(--color-main-text));
-		outline-offset: -2px;
+		outline-offset: 2px;
 	}
 
 	&:disabled {
@@ -375,6 +395,41 @@ function tabClass(tab: NcTabsTab) {
 	}
 }
 
+// Nextcloud before 34: a line below the selected tab, as the sidebar tabs there
+.ncTabs__tab_legacy {
+	padding: var(--border-radius-small);
+	border-block-end: var(--default-grid-baseline) solid transparent;
+	border-radius: var(--border-radius-small);
+	transition: background-color var(--animation-quick), border-block-end-color var(--animation-quick);
+
+	&::after {
+		display: none;
+	}
+
+	&.ncTabs__tab_selected {
+		border-block-end-color: var(--tabs-indicator-color, var(--color-primary-element));
+		border-end-start-radius: 0;
+		border-end-end-radius: 0;
+
+		&,
+		&:hover:not(:disabled) {
+			background-color: var(--color-main-background);
+		}
+
+		&:hover:not(:disabled) {
+			color: var(--color-primary-element-light-text);
+			background-color: var(--color-primary-element-light-hover);
+		}
+	}
+}
+
+.ncTabs__label {
+	display: flex;
+	align-items: center;
+	gap: var(--default-grid-baseline);
+	max-width: 100%;
+}
+
 .ncTabs__tab_selected .ncTabs__name {
 	font-weight: var(--tabs-tab-selected-font-weight, var(--tabs-tab-font-weight, var(--font-weight-element, normal)));
 }
@@ -384,6 +439,10 @@ function tabClass(tab: NcTabsTab) {
 	font-weight: var(--tabs-tab-font-weight, var(--font-weight-element, normal));
 	white-space: nowrap;
 	text-overflow: ellipsis;
+}
+
+.ncTabs__tab_legacy.ncTabs__tab_selected .ncTabs__name {
+	font-weight: var(--font-weight-element, bold);
 }
 
 .ncTabs__panel {
