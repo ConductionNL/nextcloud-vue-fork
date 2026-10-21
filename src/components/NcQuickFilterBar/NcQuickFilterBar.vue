@@ -70,6 +70,28 @@ export default {
 }
 </script>
 ```
+
+### Exposed CSS Variables
+
+| Variable | Description |
+|---|---|
+| `--quick-filter-bar-gap` | Space between the filters. Defaults to one grid baseline. |
+| `--quick-filter-bar-filter-color` | Text color of a filter. Defaults to `--color-primary-element-light-text`, like a secondary button. |
+| `--quick-filter-bar-filter-background-color` | Background of a filter. Defaults to `--color-primary-element-light`. |
+| `--quick-filter-bar-filter-border-color` | Border color of a filter. Defaults to `--color-primary-element-light-hover`. |
+| `--quick-filter-bar-filter-border-radius` | Corner radius of a filter. Defaults to the button radius. |
+| `--quick-filter-bar-filter-font-family` | Font of a filter. Inherited by default. |
+| `--quick-filter-bar-filter-font-size` | Font size of a filter. Defaults to `--default-font-size`. |
+| `--quick-filter-bar-filter-font-weight` | Font weight of a filter. Defaults to `--font-weight-element`. |
+| `--quick-filter-bar-filter-hover-color` | Text color of a hovered filter. Defaults to `--quick-filter-bar-filter-color`. |
+| `--quick-filter-bar-filter-hover-background-color` | Background of a hovered filter. Defaults to `--color-primary-element-light-hover`. |
+| `--quick-filter-bar-filter-pressed-color` | Text color of a selected filter. Defaults to `--color-primary-element-text`, like a primary button. |
+| `--quick-filter-bar-filter-pressed-background-color` | Background of a selected filter. Defaults to `--color-primary-element`. |
+| `--quick-filter-bar-filter-pressed-border-color` | Border color of a selected filter. Defaults to `--color-primary-element-hover`. |
+| `--quick-filter-bar-filter-pressed-hover-background-color` | Background of a hovered selected filter. Defaults to `--color-primary-element-hover`. |
+| `--quick-filter-bar-filter-pressed-font-weight` | Font weight of a selected filter. Defaults to `--quick-filter-bar-filter-font-weight`. |
+
+They can be set on the filters or on any of its parents, for example `body` to restyle every quick filter bar at once. The names follow the pressed button tokens of the NL Design System.
 </docs>
 
 <script setup lang="ts">
@@ -168,6 +190,7 @@ function toggle(filter: NcQuickFilterBarFilter) {
 		<NcButton
 			v-for="filter in filters"
 			:key="filter.id"
+			:class="$style.ncQuickFilterBar__filter"
 			:pressed="isSelected(filter)"
 			size="small"
 			@click="toggle(filter)">
@@ -187,10 +210,44 @@ function toggle(filter: NcQuickFilterBarFilter) {
 
 <style lang="scss" module>
 .ncQuickFilterBar {
+	// NcButton's label reads --font-weight-element; capture it here, as redeclaring
+	// it on the button with itself as the fallback would be a cycle
+	--quick-filter-bar-default-font-weight: var(--font-weight-element, bold);
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: var(--default-grid-baseline);
+	gap: var(--quick-filter-bar-gap, var(--default-grid-baseline));
+}
+
+// Theming on the NcButtons. Every fallback is the value NcButton itself uses for an
+// unpressed (secondary) and a pressed (primary) toggle button. The two classes outrank
+// NcButton's own scoped rules without `!important`.
+.ncQuickFilterBar .ncQuickFilterBar__filter:global(.button-vue) {
+	--font-weight-element: var(--quick-filter-bar-filter-font-weight, var(--quick-filter-bar-default-font-weight));
+	color: var(--quick-filter-bar-filter-color, var(--color-primary-element-light-text));
+	background-color: var(--quick-filter-bar-filter-background-color, var(--color-primary-element-light));
+	border-color: var(--quick-filter-bar-filter-border-color, var(--color-primary-element-light-hover));
+	// Corners only: NcButton derives its padding from --button-radius, so the variable must not set that
+	border-radius: var(--quick-filter-bar-filter-border-radius, var(--button-radius));
+	font-family: var(--quick-filter-bar-filter-font-family, inherit);
+	font-size: var(--quick-filter-bar-filter-font-size, var(--default-font-size));
+
+	&:hover:not(:disabled) {
+		color: var(--quick-filter-bar-filter-hover-color, var(--quick-filter-bar-filter-color, var(--color-primary-element-light-text)));
+		background-color: var(--quick-filter-bar-filter-hover-background-color, var(--color-primary-element-light-hover));
+	}
+
+	&[aria-pressed='true'] {
+		--font-weight-element: var(--quick-filter-bar-filter-pressed-font-weight, var(--quick-filter-bar-filter-font-weight, var(--quick-filter-bar-default-font-weight)));
+		color: var(--quick-filter-bar-filter-pressed-color, var(--color-primary-element-text));
+		background-color: var(--quick-filter-bar-filter-pressed-background-color, var(--color-primary-element));
+		border-color: var(--quick-filter-bar-filter-pressed-border-color, var(--color-primary-element-hover));
+
+		&:hover:not(:disabled) {
+			color: var(--quick-filter-bar-filter-pressed-color, var(--color-primary-element-text));
+			background-color: var(--quick-filter-bar-filter-pressed-hover-background-color, var(--color-primary-element-hover));
+		}
+	}
 }
 
 .ncQuickFilterBar__label {
