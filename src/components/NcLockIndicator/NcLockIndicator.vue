@@ -76,6 +76,17 @@ export default {
 }
 </style>
 ```
+
+### Exposed CSS Variables
+
+| Variable | Description |
+|---|---|
+| `--lock-indicator-other-color` | Color of the padlock and the label for a lock someone else holds. Defaults to the warning text color. |
+| `--lock-indicator-own-color` | Color of the padlock and the label for a lock the current user holds. Defaults to `--color-text-maxcontrast`. |
+| `--lock-indicator-gap` | Space between the padlock and the label. Defaults to one grid baseline. |
+| `--lock-indicator-label-font-size` | Font size of the label. Defaults to `--font-size-small`. |
+
+They can be set on the indicator or on any of its parents, for example `body` to restyle every lock indicator at once.
 </docs>
 
 <script setup lang="ts">
@@ -137,20 +148,20 @@ const label = computed(() => {
 	display: inline-flex;
 	flex-shrink: 0;
 	align-items: center;
-	gap: var(--default-grid-baseline);
+	gap: var(--lock-indicator-gap, var(--default-grid-baseline));
 	vertical-align: middle;
 }
 
 .ncLockIndicator_other {
-	color: var(--color-text-warning, var(--color-warning-text));
+	color: var(--lock-indicator-other-color, var(--color-text-warning, var(--color-warning-text)));
 }
 
 .ncLockIndicator_mine {
-	color: var(--color-text-maxcontrast);
+	color: var(--lock-indicator-own-color, var(--color-text-maxcontrast));
 }
 
 .ncLockIndicator__label {
-	font-size: var(--font-size-small);
+	font-size: var(--lock-indicator-label-font-size, var(--font-size-small));
 	white-space: nowrap;
 }
 </style>
