@@ -142,6 +142,21 @@ export default {
 }
 </script>
 ```
+
+### Exposed CSS Variables
+
+| Variable | Description |
+|---|---|
+| `--breadcrumbs-link-color` | Text color of a crumb that links to a parent. Defaults to `--color-text-maxcontrast`. |
+| `--breadcrumbs-link-hover-color` | Text color of a hovered or focused link. Defaults to `--color-main-text`. |
+| `--breadcrumbs-link-hover-background-color` | Background of a hovered or focused link. Defaults to `--color-background-dark`. |
+| `--breadcrumbs-link-font-weight` | Font weight of a link. Defaults to `--font-weight-element`, or normal. |
+| `--breadcrumbs-current-font-weight` | Font weight of the last crumb, the current location. Defaults to `--font-weight-element`, or bold. |
+| `--breadcrumbs-separator-color` | Color of the chevrons between the crumbs. Defaults to `--color-text-maxcontrast`. |
+| `--breadcrumbs-font-family` | Font of the crumbs. Inherited by default. |
+| `--breadcrumbs-font-size` | Font size of the crumbs. Defaults to `--default-font-size`. |
+
+They can be set on the breadcrumbs or on any of its parents, for example `body` to restyle all breadcrumbs at once. The names follow the breadcrumb navigation tokens of the NL Design System.
 </docs>
 
 <script>
