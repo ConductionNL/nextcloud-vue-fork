@@ -111,6 +111,15 @@ export default {
 | `--tabs-indicator-border-radius` | Corner radius of the bar below the selected tab. Defaults to a pill. |
 | `--tabs-focus-outline-color` | Color of the focus outline of a tab and the panel. Defaults to `--color-main-text`. |
 | `--tabs-panel-padding-block` | Space above and below the panel. Defaults to three grid baselines. |
+| `--tabs-tab-border-width` | Width of the border around a tab. Defaults to `0`, no border. |
+| `--tabs-tab-border-style` | Style of the border around a tab. Defaults to `solid`. |
+| `--tabs-tab-border-color` | Color of the border around a tab. Defaults to `transparent`. |
+| `--tabs-panel-padding-inline` | Space before and after the content of the panel. Defaults to `0`. |
+| `--tabs-panel-border-width` | Width of the border around the panel. Defaults to `0`, no border. |
+| `--tabs-panel-border-style` | Style of the border around the panel. Defaults to `solid`. |
+| `--tabs-panel-border-color` | Color of the border around the panel. Defaults to `transparent`. |
+| `--tabs-focus-outline-width` | Width of the focus outline of a tab and the panel. Defaults to `2px`. |
+| `--tabs-focus-outline-offset` | Distance between the focus outline and a tab or the panel. Defaults to `2px`. |
 
 They can be set on the tabs or on any of its parents, for example `body` to restyle all tabs at once. On Nextcloud before 34 the tabs take the older look of the sidebar tabs there, a line below the selected tab, which takes `--tabs-indicator-color`.
 </docs>
@@ -344,7 +353,7 @@ function tabClass(tab: NcTabsTab) {
 	margin: 0;
 	padding: var(--tabs-tab-padding, var(--default-grid-baseline));
 	padding-block-end: var(--tabs-tab-padding-block-end, calc(2 * var(--default-grid-baseline)));
-	border: none;
+	border: var(--tabs-tab-border-width, 0) var(--tabs-tab-border-style, solid) var(--tabs-tab-border-color, transparent);
 	border-radius: var(--tabs-tab-border-radius, var(--border-radius-element));
 	color: var(--tabs-tab-color, var(--color-main-text));
 	background-color: var(--tabs-tab-background-color, var(--color-main-background));
@@ -370,8 +379,8 @@ function tabClass(tab: NcTabsTab) {
 	}
 
 	&:focus-visible {
-		outline: 2px solid var(--tabs-focus-outline-color, var(--color-main-text));
-		outline-offset: 2px;
+		outline: var(--tabs-focus-outline-width, 2px) solid var(--tabs-focus-outline-color, var(--color-main-text));
+		outline-offset: var(--tabs-focus-outline-offset, 2px);
 	}
 
 	&:disabled {
@@ -447,10 +456,12 @@ function tabClass(tab: NcTabsTab) {
 
 .ncTabs__panel {
 	padding-block: var(--tabs-panel-padding-block, calc(3 * var(--default-grid-baseline)));
+	padding-inline: var(--tabs-panel-padding-inline, 0);
+	border: var(--tabs-panel-border-width, 0) var(--tabs-panel-border-style, solid) var(--tabs-panel-border-color, transparent);
 
 	&:focus-visible {
-		outline: 2px solid var(--tabs-focus-outline-color, var(--color-main-text));
-		outline-offset: 2px;
+		outline: var(--tabs-focus-outline-width, 2px) solid var(--tabs-focus-outline-color, var(--color-main-text));
+		outline-offset: var(--tabs-focus-outline-offset, 2px);
 	}
 }
 </style>
