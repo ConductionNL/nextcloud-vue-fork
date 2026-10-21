@@ -443,6 +443,9 @@ msgstr ""
 msgid "Purple"
 msgstr ""
 
+msgid "Quick filters"
+msgstr ""
+
 msgid "Raw link {options}"
 msgstr ""
 
