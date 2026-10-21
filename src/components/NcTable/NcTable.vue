@@ -172,6 +172,20 @@ The table can be restyled with the CSS variables below, set on the table or on a
 | `--table-header-text-transform` | Text transform of the header cells, for example `uppercase`. Defaults to `none`. |
 | `--table-data-cell-font-size` | Font size of the cells. Defaults to `--table-font-size`. |
 | `--table-data-cell-font-weight` | Font weight of the cells. Inherited by default. |
+| `--table-border-color` | Color of the border around the table. Defaults to `transparent`. |
+| `--table-border-width` | Width of the border around the table. Defaults to `0`, no border. |
+| `--table-line-height` | Line height of the table. Inherited by default. |
+| `--table-cell-line-height` | Line height of a cell. Defaults to `--table-line-height`. |
+| `--table-header-cell-color` | Text color of the header cells; takes precedence over `--table-header-color`. |
+| `--table-header-cell-font-size` | Font size of the header cells; takes precedence over `--table-header-font-size`. |
+| `--table-header-cell-font-weight` | Font weight of the header cells; takes precedence over `--table-header-font-weight`. |
+| `--table-header-cell-text-transform` | Text transform of the header cells; takes precedence over `--table-header-text-transform`. |
+| `--table-header-border-block-start-color` | Color of the line above the header row. Defaults to `transparent`. |
+| `--table-header-border-block-start-width` | Width of the line above the header row. Defaults to `0`, no line. |
+| `--table-row-alternate-odd-color` | Text color of the odd rows, for striped rows. Defaults to `--table-data-cell-color`. |
+| `--table-row-alternate-even-color` | Text color of the even rows. Defaults to `--table-data-cell-color`. |
+| `--table-row-padding-inline-start` | Padding before the first cell of a row. Defaults to `--table-cell-padding-inline-start`. |
+| `--table-row-padding-inline-end` | Padding after the last cell of a row. Defaults to `--table-cell-padding-inline-end`. |
 
 The two variables for selected rows have no counterpart in the NL Design System, which has no selectable rows.
 </docs>
@@ -622,9 +636,11 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 .ncTable__table {
 	width: 100%;
 	border-collapse: collapse;
+	border: var(--table-border-width, 0) solid var(--table-border-color, transparent);
 	background-color: var(--table-background-color, transparent);
 	font-family: var(--table-font-family, inherit);
 	font-size: var(--table-font-size, inherit);
+	line-height: var(--table-line-height, inherit);
 }
 
 .ncTable__header,
@@ -634,16 +650,17 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 	padding-block: var(--table-cell-padding-block-start, var(--default-grid-baseline)) var(--table-cell-padding-block-end, var(--default-grid-baseline));
 	padding-inline: var(--table-cell-padding-inline-start, calc(2 * var(--default-grid-baseline))) var(--table-cell-padding-inline-end, calc(2 * var(--default-grid-baseline)));
 	border-bottom: 1px solid var(--color-border);
+	line-height: var(--table-cell-line-height, inherit);
 	text-align: start;
 	vertical-align: middle;
 }
 
 .ncTable__header {
 	height: var(--default-clickable-area);
-	color: var(--table-header-color, var(--color-text-maxcontrast));
-	font-size: var(--table-header-font-size, inherit);
-	font-weight: var(--table-header-font-weight, normal);
-	text-transform: var(--table-header-text-transform, none);
+	color: var(--table-header-cell-color, var(--table-header-color, var(--color-text-maxcontrast)));
+	font-size: var(--table-header-cell-font-size, var(--table-header-font-size, inherit));
+	font-weight: var(--table-header-cell-font-weight, var(--table-header-font-weight, normal));
+	text-transform: var(--table-header-cell-text-transform, var(--table-header-text-transform, none));
 	white-space: nowrap;
 }
 
@@ -659,6 +676,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 .ncTable__table > thead > tr > th {
 	border-bottom-color: var(--table-header-border-block-end-color, var(--color-border));
 	border-bottom-width: var(--table-header-border-block-end-width, 1px);
+	border-top: var(--table-header-border-block-start-width, 0) solid var(--table-header-border-block-start-color, transparent);
 	background-color: var(--table-header-background-color, transparent);
 }
 
@@ -671,14 +689,14 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 // The cell gives up its own padding to the button, so the label lines up with the
 // values below it, and the label keeps the weight and color of a plain header.
 .ncTable__header_sortable {
-	--font-weight-element: var(--table-header-font-weight, normal);
+	--font-weight-element: var(--table-header-cell-font-weight, var(--table-header-font-weight, normal));
 	padding-inline: 0;
 }
 
 .ncTable__header .ncTable__sort:global(.button-vue) {
 	--button-padding: var(--table-cell-padding-inline-start, calc(2 * var(--default-grid-baseline))) var(--default-grid-baseline);
-	font-size: var(--table-header-font-size, var(--table-font-size, var(--default-font-size)));
-	color: var(--table-header-color, var(--color-text-maxcontrast));
+	font-size: var(--table-header-cell-font-size, var(--table-header-font-size, var(--table-font-size, var(--default-font-size))));
+	color: var(--table-header-cell-color, var(--table-header-color, var(--color-text-maxcontrast)));
 
 	&:hover:not(:disabled) {
 		color: var(--color-main-text);
@@ -687,6 +705,19 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 
 .ncTable__sortIcon_idle {
 	opacity: 0.5;
+}
+
+// The first and last cell of a row take the row padding; a sortable header passes it to its button
+.ncTable__table tr > :is(.ncTable__header, .ncTable__cell, .ncTable__check, .ncTable__actions):first-child:not(.ncTable__header_sortable) {
+	padding-inline-start: var(--table-row-padding-inline-start, var(--table-cell-padding-inline-start, calc(2 * var(--default-grid-baseline))));
+}
+
+.ncTable__table tr > :is(.ncTable__header, .ncTable__cell, .ncTable__check, .ncTable__actions):last-child:not(.ncTable__header_sortable) {
+	padding-inline-end: var(--table-row-padding-inline-end, var(--table-cell-padding-inline-end, calc(2 * var(--default-grid-baseline))));
+}
+
+.ncTable__table tr > .ncTable__header_sortable:first-child .ncTable__sort:global(.button-vue) {
+	--button-padding: var(--table-row-padding-inline-start, var(--table-cell-padding-inline-start, calc(2 * var(--default-grid-baseline)))) var(--default-grid-baseline);
 }
 
 .ncTable__check {
@@ -706,8 +737,16 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 	background-color: var(--table-row-alternate-odd-background-color, var(--table-row-background-color, transparent));
 }
 
+.ncTable__row:nth-child(odd) > .ncTable__cell {
+	color: var(--table-row-alternate-odd-color, var(--table-data-cell-color, var(--color-main-text)));
+}
+
 .ncTable__row:nth-child(even) > td {
 	background-color: var(--table-row-alternate-even-background-color, var(--table-row-background-color, transparent));
+}
+
+.ncTable__row:nth-child(even) > .ncTable__cell {
+	color: var(--table-row-alternate-even-color, var(--table-data-cell-color, var(--color-main-text)));
 }
 
 .ncTable__row:hover > td {
