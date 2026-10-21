@@ -53,6 +53,28 @@ export default {
 }
 </script>
 ```
+
+### Exposed CSS Variables
+
+| Variable | Description |
+|---|---|
+| `--locked-banner-other-background-color` | Background of the banner for a lock someone else holds. Defaults to `--color-error`, mixed with the background before Nextcloud 32. |
+| `--locked-banner-other-border-color` | Color of the line at the start of that banner. Defaults to `--color-error-text`. |
+| `--locked-banner-other-color` | Text color of that banner. Defaults to `--color-main-text`. |
+| `--locked-banner-other-icon-color` | Color of the padlock on that banner. Defaults to `--locked-banner-other-border-color`. |
+| `--locked-banner-own-background-color` | Background of the banner for a lock the current user holds. Defaults to `--color-background-hover`. |
+| `--locked-banner-own-border-color` | Color of the line at the start of that banner. Defaults to `--color-border-maxcontrast`. |
+| `--locked-banner-own-color` | Text color of that banner. Defaults to `--color-main-text`. |
+| `--locked-banner-own-icon-color` | Color of the padlock on that banner. Defaults to `--locked-banner-own-border-color`. |
+| `--locked-banner-padding` | Space inside the banner. Defaults to two grid baselines. |
+| `--locked-banner-gap` | Space between the padlock, the text and the button. Defaults to two grid baselines. |
+| `--locked-banner-border-width` | Width of the line at the start of the banner. Defaults to one grid baseline. |
+| `--locked-banner-border-radius` | Corner radius of the banner. Defaults to `--border-radius-small`. |
+| `--locked-banner-font-family` | Font of the banner. Inherited by default. |
+| `--locked-banner-message-font-weight` | Font weight of the message. Defaults to bold. |
+| `--locked-banner-expiry-color` | Color of the line about when the lock expires. Defaults to `--color-text-maxcontrast`. |
+
+They can be set on the banner or on any of its parents, for example `body` to restyle every locked banner at once. The names follow the alert tokens of the NL Design System.
 </docs>
 
 <script setup lang="ts">
@@ -164,35 +186,40 @@ const expiry = computed(() => {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: flex-start;
-	gap: calc(2 * var(--default-grid-baseline));
+	gap: var(--locked-banner-gap, calc(2 * var(--default-grid-baseline)));
 	margin-block: 1rem;
-	padding: calc(2 * var(--default-grid-baseline));
-	border-inline-start: var(--default-grid-baseline) solid var(--locked-banner-tone-accent);
-	border-radius: var(--border-radius-small);
-	color: var(--color-main-text);
+	padding: var(--locked-banner-padding, calc(2 * var(--default-grid-baseline)));
+	border-inline-start: var(--locked-banner-border-width, var(--default-grid-baseline)) solid var(--locked-banner-tone-accent);
+	border-radius: var(--locked-banner-border-radius, var(--border-radius-small));
+	color: var(--locked-banner-tone-color);
 	background-color: var(--locked-banner-tone-background);
+	font-family: var(--locked-banner-font-family, inherit);
 }
 
 // Someone else's lock is an error, like an error NcNoteCard
 .ncLockedBanner_other {
-	--locked-banner-tone-accent: var(--color-error-text);
-	--locked-banner-tone-background: var(--color-error);
+	--locked-banner-tone-accent: var(--locked-banner-other-border-color, var(--color-error-text));
+	--locked-banner-tone-background: var(--locked-banner-other-background-color, var(--color-error));
+	--locked-banner-tone-color: var(--locked-banner-other-color, var(--color-main-text));
+	--locked-banner-tone-icon: var(--locked-banner-other-icon-color, var(--locked-banner-tone-accent));
 }
 
 // Before Nextcloud 32 the error color is strong, so it is mixed into the background like NcNoteCard does
 .ncLockedBanner_other.ncLockedBanner_legacy {
-	--locked-banner-tone-background: color-mix(in srgb, var(--color-error), var(--color-main-background) 80%);
+	--locked-banner-tone-background: var(--locked-banner-other-background-color, color-mix(in srgb, var(--color-error), var(--color-main-background) 80%));
 }
 
 // The current user's own lock is nothing wrong, so it is a neutral note
 .ncLockedBanner_mine {
-	--locked-banner-tone-accent: var(--color-border-maxcontrast);
-	--locked-banner-tone-background: var(--color-background-hover);
+	--locked-banner-tone-accent: var(--locked-banner-own-border-color, var(--color-border-maxcontrast));
+	--locked-banner-tone-background: var(--locked-banner-own-background-color, var(--color-background-hover));
+	--locked-banner-tone-color: var(--locked-banner-own-color, var(--color-main-text));
+	--locked-banner-tone-icon: var(--locked-banner-own-icon-color, var(--locked-banner-tone-accent));
 }
 
 .ncLockedBanner__icon {
 	flex-shrink: 0;
-	color: var(--locked-banner-tone-accent);
+	color: var(--locked-banner-tone-icon);
 }
 
 .ncLockedBanner__text {
@@ -202,12 +229,12 @@ const expiry = computed(() => {
 
 .ncLockedBanner__message {
 	margin: 0;
-	font-weight: bold;
+	font-weight: var(--locked-banner-message-font-weight, bold);
 }
 
 .ncLockedBanner__expiry {
 	margin: var(--default-grid-baseline) 0 0;
-	color: var(--color-text-maxcontrast);
+	color: var(--locked-banner-expiry-color, var(--color-text-maxcontrast));
 }
 
 .ncLockedBanner__action {
