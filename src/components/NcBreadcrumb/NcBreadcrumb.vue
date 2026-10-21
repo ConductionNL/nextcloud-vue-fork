@@ -308,7 +308,7 @@ export default {
 	}
 	&__separator {
 		padding: 0;
-		color: var(--color-text-maxcontrast);
+		color: var(--breadcrumbs-separator-color, var(--color-text-maxcontrast));
 	}
 	// Necessary for indicating hovering for drag and drop
 	&#{&}--hovered :deep(.button-vue) {
@@ -317,17 +317,25 @@ export default {
 	}
 	// Adjust button style
 	&:not(:last-child) :deep() .button-vue {
-		color: var(--color-text-maxcontrast);
+		color: var(--breadcrumbs-link-color, var(--color-text-maxcontrast));
 
 		&:hover,
 		&:focus {
-			background-color: var(--color-background-dark);
-			color: var(--color-main-text);
+			background-color: var(--breadcrumbs-link-hover-background-color, var(--color-background-dark));
+			color: var(--breadcrumbs-link-hover-color, var(--color-main-text));
 		}
 
 		&__text {
-			font-weight: var(--font-weight-element, normal);
+			font-weight: var(--breadcrumbs-link-font-weight, var(--font-weight-element, normal));
 		}
+	}
+	// The font of every crumb, and the current location: the last crumb
+	:deep(.button-vue) {
+		font-family: var(--breadcrumbs-font-family, inherit);
+		font-size: var(--breadcrumbs-font-size, var(--default-font-size));
+	}
+	&:last-child :deep(.button-vue__text) {
+		font-weight: var(--breadcrumbs-current-font-weight, var(--font-weight-element, bold));
 	}
 	:deep(.button-vue__text) {
 		margin: 0;

@@ -117,6 +117,46 @@ export default {
 }
 </style>
 ```
+
+### Breadcrumbs as data
+
+Instead of `NcBreadcrumb` components, the trail can be passed as an array in `crumbs`, root first. Each crumb has a `name`, and a `to` for vue-router or an `href` to link to, an optional `title` and an optional `iconPath`, for example one from `@mdi/js`. Like the `icon` slot of `NcBreadcrumb`, an icon is shown instead of the name, and the name becomes its accessible label. The last crumb is the current location: it is not linked and is marked with `aria-current="page"`. When `crumbs` is set, the `NcBreadcrumb` components in the default slot are not used.
+
+```vue
+<template>
+	<NcBreadcrumbs :crumbs="crumbs" />
+</template>
+
+<script>
+export default {
+	data() {
+		return {
+			crumbs: [
+				{ name: 'Home', href: '#' },
+				{ name: 'Team vault', href: '#' },
+				{ name: 'Secrets', href: '#' },
+				{ name: 'Production' },
+			],
+		}
+	},
+}
+</script>
+```
+
+### Exposed CSS Variables
+
+| Variable | Description |
+|---|---|
+| `--breadcrumbs-link-color` | Text color of a crumb that links to a parent. Defaults to `--color-text-maxcontrast`. |
+| `--breadcrumbs-link-hover-color` | Text color of a hovered or focused link. Defaults to `--color-main-text`. |
+| `--breadcrumbs-link-hover-background-color` | Background of a hovered or focused link. Defaults to `--color-background-dark`. |
+| `--breadcrumbs-link-font-weight` | Font weight of a link. Defaults to `--font-weight-element`, or normal. |
+| `--breadcrumbs-current-font-weight` | Font weight of the last crumb, the current location. Defaults to `--font-weight-element`, or bold. |
+| `--breadcrumbs-separator-color` | Color of the chevrons between the crumbs. Defaults to `--color-text-maxcontrast`. |
+| `--breadcrumbs-font-family` | Font of the crumbs. Inherited by default. |
+| `--breadcrumbs-font-size` | Font size of the crumbs. Defaults to `--default-font-size`. |
+
+They can be set on the breadcrumbs or on any of its parents, for example `body` to restyle all breadcrumbs at once. The names follow the breadcrumb navigation tokens of the NL Design System.
 </docs>
 
 <script>
@@ -130,6 +170,7 @@ import NcActionLink from '../NcActionLink/index.js'
 import NcActionRouter from '../NcActionRouter/index.js'
 import NcActions from '../NcActions/index.js'
 import NcBreadcrumb from '../NcBreadcrumb/index.js'
+import NcIconSvgWrapper from '../NcIconSvgWrapper/index.ts'
 
 const crumbClass = 'vue-crumb'
 
@@ -159,6 +200,20 @@ export default {
 		ariaLabel: {
 			type: String,
 			default: null,
+		},
+
+		/**
+		 * The breadcrumbs as data instead of `NcBreadcrumb` components, root first.
+		 * An `iconPath` is shown instead of the name, like the `icon` slot of `NcBreadcrumb`.
+		 * The last crumb is the current location: it is not linked and gets `aria-current="page"`.
+		 * When set, the `NcBreadcrumb` components in the default slot are not used.
+		 *
+		 * @type {Array<{name: string, to?: string|object, href?: string, title?: string, iconPath?: string}>}
+		 * @since 9.14.0
+		 */
+		crumbs: {
+			type: Array,
+			default: () => [],
 		},
 	},
 
@@ -486,6 +541,26 @@ export default {
 		isBreadcrumb(vnode) {
 			return vnode?.type?.name === 'NcBreadcrumb'
 		},
+
+		/**
+		 * Create the NcBreadcrumb components for the `crumbs` prop.
+		 * The last crumb is the current location, so it is not linked.
+		 *
+		 * @return {Array} The created VNodes
+		 */
+		crumbsFromProp() {
+			return this.crumbs.map((crumb, index) => {
+				const isCurrent = index === this.crumbs.length - 1
+				return h(NcBreadcrumb, {
+					key: `crumb-${index}`,
+					name: crumb.name,
+					title: crumb.title ?? null,
+					to: isCurrent ? undefined : crumb.to,
+					href: isCurrent ? undefined : crumb.href,
+					'aria-current': isCurrent ? 'page' : undefined,
+				}, crumb.iconPath ? { icon: () => h(NcIconSvgWrapper, { path: crumb.iconPath, size: 20 }) } : undefined)
+			})
+		},
 	},
 
 	/**
@@ -494,10 +569,11 @@ export default {
 	 * @return {object|undefined} The created VNode
 	 */
 	render() {
-		// Get the breadcrumbs
-		let breadcrumbs = []
+		// Get the breadcrumbs, from the crumbs prop or else from the slot
+		let breadcrumbs = this.crumbs.length > 0 ? this.crumbsFromProp() : []
 		// We have to iterate over all slot elements
-		this.$slots.default?.().forEach((vnode) => {
+		const slotNodes = this.crumbs.length > 0 ? [] : (this.$slots.default?.() ?? [])
+		slotNodes.forEach((vnode) => {
 			if (this.isBreadcrumb(vnode)) {
 				breadcrumbs.push(vnode)
 				return
