@@ -122,8 +122,32 @@ export default {
 | `--chip-font-size` | Font size of the text. Inherited by default. |
 | `--chip-small-font-size` | Font size of the text of a small chip. Defaults to `--font-size-small`. |
 | `--chip-font-weight` | Font weight of the text. Inherited by default. |
+| `--chip-font-style` | Font style of the text. Inherited by default. |
+| `--chip-line-height` | Line height of the text. Inherited by default. |
+| `--chip-letter-spacing` | Letter spacing of the text. Inherited by default. |
+| `--chip-text-transform` | Text transform of the text, for example `uppercase`. Inherited by default. |
+| `--chip-padding-inline` | Space between the text and the edge of the chip, on the sides without an icon or actions. Defaults to two grid baselines. |
+| `--chip-primary-background-color` | Background of a `primary` chip. Defaults to `--color-primary-element`. |
+| `--chip-primary-color` | Text color of a `primary` chip. Defaults to `--color-primary-element-text`. |
+| `--chip-secondary-background-color` | Background of a `secondary` chip. Defaults to `--color-primary-element-light`. |
+| `--chip-secondary-color` | Text color of a `secondary` chip. Defaults to `--color-primary-element-light-text`. |
+| `--chip-tertiary-background-color` | Background of a `tertiary` chip. Defaults to `--color-background-hover`. |
+| `--chip-tertiary-color` | Text color of a `tertiary` chip. Inherited by default. |
+| `--chip-error-background-color` | Background of an `error` chip. Defaults to `--color-error`. |
+| `--chip-error-color` | Text color of an `error` chip. Defaults to `--color-error-text`. |
+| `--chip-warning-background-color` | Background of a `warning` chip. Defaults to `--color-warning`. |
+| `--chip-warning-color` | Text color of a `warning` chip. Defaults to `--color-warning-text`. |
+| `--chip-success-background-color` | Background of a `success` chip. Defaults to `--color-success`. |
+| `--chip-success-color` | Text color of a `success` chip. Defaults to `--color-success-text`. |
+| `--chip-info-background-color` | Background of an `info` chip. Defaults to `--color-info`. |
+| `--chip-info-color` | Text color of an `info` chip. Defaults to `--color-info-text`. |
+| `--chip-light-color` | Text color of a chip with `light`. Defaults to `--color-main-text`. |
+| `--chip-light-error-background-color` | Background of a light `error` chip. Defaults to the error color mixed with the background. |
+| `--chip-light-warning-background-color` | Background of a light `warning` chip. Defaults to the warning color mixed with the background. |
+| `--chip-light-success-background-color` | Background of a light `success` chip. Defaults to the success color mixed with the background. |
+| `--chip-light-info-background-color` | Background of a light `info` chip. Defaults to the info color mixed with the background. |
 
-Except `--chip-size`, they can be set on the chip or on any of its parents, for example `body` to restyle every chip at once. The names follow the badge tokens of the NL Design System.
+Except `--chip-size`, they can be set on the chip or on any of its parents, for example `body` to restyle every chip at once. The names follow the badge and status badge tokens of the NL Design System.
 </docs>
 
 <template>
@@ -294,39 +318,44 @@ const hasIcon = () => Boolean(props.iconPath || props.iconSvg || !!slots.icon)
 	align-items: center;
 	// The variables are read here so they can be set on any parent, for example by a theme
 	border-radius: var(--chip-border-radius, var(--chip-radius));
-	background-color: var(--color-background-hover);
+	background-color: var(--chip-tertiary-background-color, var(--color-background-hover));
+	color: var(--chip-tertiary-color, inherit);
 	font-family: var(--chip-font-family, inherit);
 	font-size: var(--chip-font-size, inherit);
+	font-style: var(--chip-font-style, inherit);
 	font-weight: var(--chip-font-weight, inherit);
+	line-height: var(--chip-line-height, inherit);
+	letter-spacing: var(--chip-letter-spacing, inherit);
+	text-transform: var(--chip-text-transform, inherit);
 
 	&--primary {
-		background-color: var(--color-primary-element);
-		color: var(--color-primary-element-text);
+		background-color: var(--chip-primary-background-color, var(--color-primary-element));
+		color: var(--chip-primary-color, var(--color-primary-element-text));
 	}
 
 	&--secondary {
-		background-color: var(--color-primary-element-light);
-		color: var(--color-primary-element-light-text);
+		background-color: var(--chip-secondary-background-color, var(--color-primary-element-light));
+		color: var(--chip-secondary-color, var(--color-primary-element-light-text));
 	}
 
 	&--error {
-		background-color: var(--color-error);
-		color: var(--color-error-text);
+		background-color: var(--chip-error-background-color, var(--color-error));
+		color: var(--chip-error-color, var(--color-error-text));
 	}
 
 	&--warning {
-		background-color: var(--color-warning);
-		color: var(--color-warning-text);
+		background-color: var(--chip-warning-background-color, var(--color-warning));
+		color: var(--chip-warning-color, var(--color-warning-text));
 	}
 
 	&--success {
-		background-color: var(--color-success);
-		color: var(--color-success-text);
+		background-color: var(--chip-success-background-color, var(--color-success));
+		color: var(--chip-success-color, var(--color-success-text));
 	}
 
 	&--info {
-		background-color: var(--color-info);
-		color: var(--color-info-text);
+		background-color: var(--chip-info-background-color, var(--color-info));
+		color: var(--chip-info-color, var(--color-info-text));
 	}
 
 	&--small {
@@ -336,33 +365,33 @@ const hasIcon = () => Boolean(props.iconPath || props.iconSvg || !!slots.icon)
 
 	// The status color mixed into the background, like NcNoteCard
 	&--light {
-		color: var(--color-main-text);
+		color: var(--chip-light-color, var(--color-main-text));
 
 		&.nc-chip--error {
-			background-color: color-mix(in srgb, var(--color-error), var(--color-main-background) 80%);
+			background-color: var(--chip-light-error-background-color, color-mix(in srgb, var(--color-error), var(--color-main-background) 80%));
 		}
 
 		&.nc-chip--warning {
-			background-color: color-mix(in srgb, var(--color-warning), var(--color-main-background) 80%);
+			background-color: var(--chip-light-warning-background-color, color-mix(in srgb, var(--color-warning), var(--color-main-background) 80%));
 		}
 
 		&.nc-chip--success {
-			background-color: color-mix(in srgb, var(--color-success), var(--color-main-background) 80%);
+			background-color: var(--chip-light-success-background-color, color-mix(in srgb, var(--color-success), var(--color-main-background) 80%));
 		}
 
 		&.nc-chip--info {
-			background-color: color-mix(in srgb, var(--color-info), var(--color-main-background) 80%);
+			background-color: var(--chip-light-info-background-color, color-mix(in srgb, var(--color-info), var(--color-main-background) 80%));
 		}
 	}
 
 	&--no-actions &__text {
 		// If there are no actions we need to add some padding to ensure the text is not cut-off
-		padding-inline-end: calc(2 * var(--default-grid-baseline));
+		padding-inline-end: var(--chip-padding-inline, calc(2 * var(--default-grid-baseline)));
 	}
 
 	&--no-icon &__text {
 		// Add some more space to the border
-		padding-inline-start: calc(2 * var(--default-grid-baseline));
+		padding-inline-start: var(--chip-padding-inline, calc(2 * var(--default-grid-baseline)));
 	}
 
 	&__text {

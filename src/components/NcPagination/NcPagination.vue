@@ -158,6 +158,19 @@ The pagination can be restyled with the CSS variables below, set on the paginati
 | `--pagination-relative-link-disabled-background-color` | Background of a disabled relative link. Defaults to `--pagination-relative-link-background-color`. |
 | `--pagination-relative-link-disabled-opacity` | Opacity of a disabled relative link. Defaults to `0.5`, like a disabled button. |
 | `--pagination-relative-link-disabled-filter` | Filter on a disabled relative link. Defaults to `saturate(0.7)`, like a disabled button. |
+| `--pagination-font-family` | Font of the pagination. Inherited by default. |
+| `--pagination-font-size` | Font size of the pagination. Inherited by default. |
+| `--pagination-line-height` | Line height of the pagination. Inherited by default. |
+| `--pagination-page-link-border-width` | Border width of a page link. Defaults to `1px 1px 2px`, like a button. |
+| `--pagination-page-link-text-decoration` | Text decoration of a page link, for example `underline`. Defaults to `none`. |
+| `--pagination-page-link-current-text-decoration` | Text decoration of the current page. Defaults to `--pagination-page-link-text-decoration`. |
+| `--pagination-relative-link-border-width` | Border width of a relative link. Defaults to `1px 1px 2px`, like a button. |
+| `--pagination-relative-link-text-decoration` | Text decoration of a relative link. Defaults to `none`. |
+| `--pagination-relative-link-disabled-text-decoration` | Text decoration of a disabled relative link. Defaults to `--pagination-relative-link-text-decoration`. |
+| `--pagination-relative-link-focus-color` | Icon color of a focused relative link. Defaults to `--pagination-relative-link-color`. |
+| `--pagination-relative-link-focus-background-color` | Background of a focused relative link. Defaults to `--pagination-relative-link-background-color`. |
+| `--pagination-relative-link-focus-visible-color` | Icon color of a relative link focused with the keyboard. Defaults to `--pagination-relative-link-focus-color`. |
+| `--pagination-relative-link-focus-visible-background-color` | Background of a relative link focused with the keyboard. Defaults to `--pagination-relative-link-focus-background-color`. |
 
 A disabled relative link is washed out like a disabled button. When the disabled colors already show that it is disabled, set `--pagination-relative-link-disabled-opacity` to `1` and `--pagination-relative-link-disabled-filter` to `none`.
 </docs>
@@ -393,6 +406,9 @@ function setPageSize(size: number | null) {
 	justify-content: space-between;
 	gap: calc(2 * var(--default-grid-baseline)) calc(4 * var(--default-grid-baseline));
 	padding-block: calc(3 * var(--default-grid-baseline));
+	font-family: var(--pagination-font-family, inherit);
+	font-size: var(--pagination-font-size, inherit);
+	line-height: var(--pagination-line-height, inherit);
 }
 
 // The info and the end share the space left of and right of the page buttons
@@ -452,6 +468,18 @@ function setPageSize(size: number | null) {
 		border-color: var(--pagination-relative-link-border-color, transparent);
 		// Corners only: NcButton derives its padding from --button-radius, so the token must not set that
 		border-radius: var(--pagination-relative-link-border-radius, var(--button-radius));
+		border-width: var(--pagination-relative-link-border-width, 1px 1px 2px);
+		text-decoration: var(--pagination-relative-link-text-decoration, none);
+
+		&:focus:not(:disabled) {
+			color: var(--pagination-relative-link-focus-color, var(--pagination-relative-link-color, var(--color-main-text)));
+			background-color: var(--pagination-relative-link-focus-background-color, var(--pagination-relative-link-background-color, transparent));
+		}
+
+		&:focus-visible:not(:disabled) {
+			color: var(--pagination-relative-link-focus-visible-color, var(--pagination-relative-link-focus-color, var(--pagination-relative-link-color, var(--color-main-text))));
+			background-color: var(--pagination-relative-link-focus-visible-background-color, var(--pagination-relative-link-focus-background-color, var(--pagination-relative-link-background-color, transparent)));
+		}
 
 		&:hover:not(:disabled) {
 			color: var(--pagination-relative-link-hover-color, var(--pagination-relative-link-color, var(--color-main-text)));
@@ -466,6 +494,7 @@ function setPageSize(size: number | null) {
 		&:disabled {
 			color: var(--pagination-relative-link-disabled-color, var(--pagination-relative-link-color, var(--color-main-text)));
 			background-color: var(--pagination-relative-link-disabled-background-color, var(--pagination-relative-link-background-color, transparent));
+			text-decoration: var(--pagination-relative-link-disabled-text-decoration, var(--pagination-relative-link-text-decoration, none));
 			opacity: var(--pagination-relative-link-disabled-opacity, 0.5);
 			filter: var(--pagination-relative-link-disabled-filter, saturate(0.7));
 		}
@@ -484,6 +513,8 @@ function setPageSize(size: number | null) {
 		border-color: var(--pagination-page-link-border-color, transparent);
 		// Corners only: NcButton derives its padding from --button-radius, so the token must not set that
 		border-radius: var(--pagination-page-link-border-radius, var(--button-radius));
+		border-width: var(--pagination-page-link-border-width, 1px 1px 2px);
+		text-decoration: var(--pagination-page-link-text-decoration, none);
 
 		&:hover:not(:disabled) {
 			color: var(--pagination-page-link-hover-color, var(--pagination-page-link-color, var(--color-main-text)));
@@ -502,6 +533,7 @@ function setPageSize(size: number | null) {
 			color: var(--pagination-page-link-current-color, var(--color-primary-element-text));
 			background-color: var(--pagination-page-link-current-background-color, var(--color-primary-element));
 			border-color: var(--pagination-page-link-current-border-color, var(--color-primary-element-hover));
+			text-decoration: var(--pagination-page-link-current-text-decoration, var(--pagination-page-link-text-decoration, none));
 
 			&:hover:not(:disabled) {
 				color: var(--pagination-page-link-current-color, var(--color-primary-element-text));

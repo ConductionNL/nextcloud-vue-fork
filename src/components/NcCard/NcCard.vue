@@ -136,6 +136,13 @@ export default {
 | `--card-heading-font-weight` | Font weight of the heading. Defaults to bold. |
 | `--card-heading-line-height` | Line height of the heading. Defaults to `1.5`. |
 | `--card-description-color` | Color of the description. Defaults to `--color-text-maxcontrast`. |
+| `--card-box-shadow` | Shadow of the card. Defaults to `none`. |
+| `--card-row-gap` | Space between the parts of the card; takes precedence over `--card-gap`. |
+| `--card-inline-size` | Width of the card. Defaults to `auto`. |
+| `--card-max-inline-size` | Maximum width of the card. Defaults to `none`. |
+| `--card-link-text-decoration` | Text decoration of the heading of a link card. Defaults to `none`. |
+| `--card-link-hover-text-decoration` | Text decoration of the heading of a hovered link card, for example `underline`. Defaults to `--card-link-text-decoration`. |
+| `--card-link-hover-text-decoration-thickness` | Thickness of that underline. Defaults to `auto`. |
 
 They can be set on the card or on any of its parents, for example `body` to restyle every card at once.
 </docs>
@@ -271,13 +278,16 @@ const linkAttrs = computed(() => linkTag.value === 'RouterLink' ? { to: props.to
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	gap: var(--card-gap, calc(2 * var(--default-grid-baseline)));
+	gap: var(--card-row-gap, var(--card-gap, calc(2 * var(--default-grid-baseline))));
 	min-width: 0;
 	padding: var(--card-padding, calc(4 * var(--default-grid-baseline)));
 	border: var(--card-border-width, 1px) solid var(--card-border-color, var(--color-border));
 	border-radius: var(--card-border-radius, var(--border-radius-large));
 	color: var(--card-color, var(--color-main-text));
+	inline-size: var(--card-inline-size, auto);
+	max-inline-size: var(--card-max-inline-size, none);
 	background-color: var(--card-background-color, var(--color-main-background));
+	box-shadow: var(--card-box-shadow, none);
 	font-family: var(--card-font-family, inherit);
 	transition: border-color var(--animation-quick), box-shadow var(--animation-quick);
 }
@@ -331,7 +341,12 @@ const linkAttrs = computed(() => linkTag.value === 'RouterLink' ? { to: props.to
 
 .ncCard__link {
 	color: inherit;
-	text-decoration: none;
+	text-decoration: var(--card-link-text-decoration, none);
+
+	&:hover {
+		text-decoration: var(--card-link-hover-text-decoration, var(--card-link-text-decoration, none));
+		text-decoration-thickness: var(--card-link-hover-text-decoration-thickness, auto);
+	}
 
 	// Covers the whole card, so the whole card is clickable
 	&::after {

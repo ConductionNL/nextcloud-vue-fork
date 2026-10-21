@@ -81,8 +81,13 @@ export default {
 | `--page-header-heading-line-height` | Line height of the heading. Defaults to `1.5`. |
 | `--page-header-description-color` | Color of the description. Defaults to `--color-text-maxcontrast`. |
 | `--page-header-description-font-size` | Font size of the description. Inherited by default. |
+| `--page-header-heading-margin-block-start` | Space above the heading. Defaults to `0`. |
+| `--page-header-heading-margin-block-end` | Space below the heading. Defaults to `0`. |
+| `--page-header-description-font-family` | Font of the description. Inherited by default. |
+| `--page-header-description-font-weight` | Font weight of the description. Inherited by default. |
+| `--page-header-description-line-height` | Line height of the description. Inherited by default. |
 
-They can be set on the header or on any of its parents, for example `body` to restyle every page header at once. The names follow the heading and paragraph tokens of the NL Design System.
+They can be set on the header or on any of its parents, for example `body` to restyle every page header at once. The names follow the heading and lead paragraph tokens of the NL Design System.
 </docs>
 
 <script setup lang="ts">
@@ -180,7 +185,8 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 }
 
 .ncPageHeader__heading {
-	margin: 0;
+	margin-block: var(--page-header-heading-margin-block-start, 0) var(--page-header-heading-margin-block-end, 0);
+	margin-inline: 0;
 	color: var(--page-header-heading-color, var(--color-main-text));
 	font-family: var(--page-header-heading-font-family, inherit);
 	font-size: var(--page-header-heading-font-size, 30px);
@@ -192,7 +198,10 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 .ncPageHeader__description {
 	margin: var(--default-grid-baseline) 0 0;
 	color: var(--page-header-description-color, var(--color-text-maxcontrast));
+	font-family: var(--page-header-description-font-family, inherit);
 	font-size: var(--page-header-description-font-size, inherit);
+	font-weight: var(--page-header-description-font-weight, inherit);
+	line-height: var(--page-header-description-line-height, inherit);
 }
 
 .ncPageHeader__actions {
