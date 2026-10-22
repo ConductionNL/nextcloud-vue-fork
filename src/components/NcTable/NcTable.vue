@@ -207,7 +207,7 @@ The two variables for selected rows have no counterpart in the NL Design System,
 			:role="overflowing ? 'group' : undefined"
 			:aria-label="overflowing ? caption : undefined">
 			<table :class="$style.ncTable__table" :aria-busy="loading ? 'true' : undefined">
-				<caption v-if="caption" class="hidden-visually">
+				<caption class="hidden-visually">
 					{{ caption }}
 				</caption>
 				<thead>
@@ -300,11 +300,11 @@ The two variables for selected rows have no counterpart in the NL Design System,
 	</div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="Row extends Record<string, any>">
 import type { Slot } from 'vue'
 
 import { mdiMenuDown, mdiMenuSwap, mdiMenuUp } from '@mdi/js'
-import { computed, getCurrentInstance, onBeforeUnmount, onMounted, ref, useCssModule } from 'vue'
+import { computed, getCurrentInstance, onBeforeUnmount, onMounted, ref, useCssModule, warn } from 'vue'
 import NcButton from '../NcButton/NcButton.vue'
 import NcCheckboxRadioSwitch from '../NcCheckboxRadioSwitch/NcCheckboxRadioSwitch.vue'
 import NcIconSvgWrapper from '../NcIconSvgWrapper/NcIconSvgWrapper.vue'
@@ -352,7 +352,7 @@ const props = withDefaults(defineProps<{
 	/**
 	 * The rows of the table. Every row needs a unique value under `rowKey`.
 	 */
-	rows: Record<string, unknown>[]
+	rows: Row[]
 
 	/**
 	 * The name of the property that identifies a row.
@@ -364,7 +364,7 @@ const props = withDefaults(defineProps<{
 	/**
 	 * The name of the table for assistive technology. It is not shown.
 	 */
-	caption?: string
+	caption: string
 
 	/**
 	 * Whether the rows are loading. Shows a loading state instead of the rows.
@@ -380,10 +380,9 @@ const props = withDefaults(defineProps<{
 	 * Returns the name of a row, used in the label of its checkbox, such as "Select Annual report.md".
 	 * Defaults to the value of the first column.
 	 */
-	rowLabel?: (row: Record<string, unknown>) => string
+	rowLabel?: (row: Row) => string
 }>(), {
 	rowKey: 'id',
-	caption: undefined,
 	rowLabel: undefined,
 })
 
@@ -409,14 +408,14 @@ const emit = defineEmits<{
 	 * @param row - The clicked row
 	 * @param event - The click event
 	 */
-	rowClick: [row: Record<string, unknown>, event: MouseEvent]
+	rowClick: [row: Row, event: MouseEvent]
 }>()
 
 const slots = defineSlots<{
 	/**
 	 * The content of the cell of column `<key>`, for example `#cell-status`.
 	 */
-	[key: `cell-${string}`]: Slot<{ row: Record<string, unknown>, value: unknown }>
+	[key: `cell-${string}`]: Slot<{ row: Row, value: unknown }>
 
 	/**
 	 * The content of the header of column `<key>`, for example `#header-status`.
@@ -427,7 +426,7 @@ const slots = defineSlots<{
 	/**
 	 * Actions for a row, for example an `NcActions` menu. Adds a trailing column.
 	 */
-	rowActions?: Slot<{ row: Record<string, unknown> }>
+	rowActions?: Slot<{ row: Row }>
 
 	/**
 	 * What is shown while `loading` is set.
@@ -444,13 +443,21 @@ const style = useCssModule()
 
 const columnCount = computed(() => props.columns.length + (props.selectable ? 1 : 0) + (slots.rowActions ? 1 : 0))
 
+let warnedMissingKey = false
+
 /**
- * The key of a row.
+ * The key of a row. Warns once when a row has none, as every row then counts as selected
+ * as soon as one is.
  *
  * @param row - The row
  */
-function keyOf(row: Record<string, unknown>): NcTableRowKey {
-	return row[props.rowKey] as NcTableRowKey
+function keyOf(row: Row): NcTableRowKey {
+	const key = row[props.rowKey] as NcTableRowKey | undefined
+	if (key === undefined && !warnedMissingKey) {
+		warnedMissingKey = true
+		warn(`[NcTable] A row has no "${props.rowKey}". Give every row a unique key, or set \`row-key\` to the property that identifies a row.`)
+	}
+	return key as NcTableRowKey
 }
 
 /**
@@ -459,7 +466,7 @@ function keyOf(row: Record<string, unknown>): NcTableRowKey {
  * @param row - The row
  * @param column - The column
  */
-function valueOf(row: Record<string, unknown>, column: NcTableColumn): unknown {
+function valueOf(row: Row, column: NcTableColumn): unknown {
 	return column.key.split('.').reduce<unknown>((value, part) => (value === null || value === undefined ? undefined : (value as Record<string, unknown>)[part]), row)
 }
 
@@ -566,7 +573,7 @@ const someSelected = computed(() => selectedCount.value > 0 && !allSelected.valu
  *
  * @param row - The row
  */
-function isSelected(row: Record<string, unknown>): boolean {
+function isSelected(row: Row): boolean {
 	return selectedSet.value.has(keyOf(row))
 }
 
@@ -575,7 +582,7 @@ function isSelected(row: Record<string, unknown>): boolean {
  *
  * @param row - The row
  */
-function checkboxLabel(row: Record<string, unknown>): string {
+function checkboxLabel(row: Row): string {
 	const firstColumn = props.columns[0]
 	const name = props.rowLabel
 		? props.rowLabel(row)
@@ -589,7 +596,7 @@ function checkboxLabel(row: Record<string, unknown>): string {
  * @param row - The row
  * @param value - Whether it is selected now
  */
-function toggleRow(row: Record<string, unknown>, value: unknown) {
+function toggleRow(row: Row, value: unknown) {
 	const key = keyOf(row)
 	const others = selected.value.filter((selectedKey) => selectedKey !== key)
 	selected.value = value ? [...others, key] : others
@@ -622,7 +629,7 @@ function hasRowClickListener(): boolean {
  * @param row - The row
  * @param event - The click event
  */
-function onRowClick(row: Record<string, unknown>, event: MouseEvent) {
+function onRowClick(row: Row, event: MouseEvent) {
 	const target = event.target as Element | null
 	if (target?.closest('a, button, input, select, textarea, label, [role="button"], [role="checkbox"]')) {
 		return
