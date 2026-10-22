@@ -228,13 +228,23 @@ export default {
 | Variable | Description |
 |---|---|
 | `--breadcrumbs-link-color` | Text color of a crumb that links to a parent. Defaults to `--color-text-maxcontrast`. |
-| `--breadcrumbs-link-hover-color` | Text color of a hovered or focused link. Defaults to `--color-main-text`. |
-| `--breadcrumbs-link-hover-background-color` | Background of a hovered or focused link. Defaults to `--color-background-dark`. |
+| `--breadcrumbs-link-background-color` | Background of a link. Defaults to `transparent`. |
+| `--breadcrumbs-link-text-decoration` | Text decoration of a link, for example `underline`. Defaults to `none`. |
 | `--breadcrumbs-link-font-weight` | Font weight of a link. Defaults to `--font-weight-element`, or normal. |
-| `--breadcrumbs-current-font-weight` | Font weight of the last crumb, the current location. Defaults to `--font-weight-element`, or bold. |
+| `--breadcrumbs-link-hover-color` | Text color of a hovered link. Defaults to `--color-main-text`. |
+| `--breadcrumbs-link-hover-background-color` | Background of a hovered link. Defaults to `--color-background-dark`. |
+| `--breadcrumbs-link-hover-text-decoration` | Text decoration of a hovered link. Defaults to `--breadcrumbs-link-text-decoration`. |
+| `--breadcrumbs-link-focus-color` | Text color of a focused link. Defaults to `--breadcrumbs-link-hover-color`. |
+| `--breadcrumbs-link-focus-background-color` | Background of a focused link. Defaults to `--breadcrumbs-link-hover-background-color`. |
+| `--breadcrumbs-link-focus-text-decoration` | Text decoration of a focused link. Defaults to `--breadcrumbs-link-text-decoration`. |
+| `--breadcrumbs-link-current-color` | Text color of the last crumb, the current location. Defaults to `--color-main-text`. |
+| `--breadcrumbs-link-current-font-weight` | Font weight of the current location. Defaults to `--font-weight-element`, or bold. |
 | `--breadcrumbs-separator-color` | Color of the chevrons between the crumbs. Defaults to `--color-text-maxcontrast`. |
+| `--breadcrumbs-separator-icon-size` | Size of the chevrons. Defaults to `20px`. |
 | `--breadcrumbs-font-family` | Font of the crumbs. Inherited by default. |
 | `--breadcrumbs-font-size` | Font size of the crumbs. Defaults to `--default-font-size`. |
+| `--breadcrumbs-line-height` | Line height of the crumbs. Inherited by default. |
+| `--breadcrumbs-min-block-size` | Height of a crumb. Defaults to `--default-clickable-area`. |
 
 They can be set on the breadcrumbs or on any of its parents, for example `body` to restyle all breadcrumbs at once. The names follow the breadcrumb navigation tokens of the NL Design System.
 </docs>
