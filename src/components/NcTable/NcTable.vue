@@ -194,6 +194,7 @@ The table can be restyled with the CSS variables below, set on the table or on a
 | `--table-row-alternate-even-color` | Text color of the even rows. Defaults to `--table-data-cell-color`. |
 | `--table-row-padding-inline-start` | Padding before the first cell of a row. Defaults to `--table-cell-padding-inline-start`. |
 | `--table-row-padding-inline-end` | Padding after the last cell of a row. Defaults to `--table-cell-padding-inline-end`. |
+| `--table-header-hover-color` | Text color of a hovered sortable header. Defaults to `--color-main-text`; set it with a dark `--table-header-background-color`. |
 
 The two variables for selected rows have no counterpart in the NL Design System, which has no selectable rows.
 </docs>
@@ -724,7 +725,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 .ncTable__actions {
 	padding-block: var(--table-cell-padding-block-start, var(--default-grid-baseline)) var(--table-cell-padding-block-end, var(--default-grid-baseline));
 	padding-inline: var(--table-cell-padding-inline-start, calc(2 * var(--default-grid-baseline))) var(--table-cell-padding-inline-end, calc(2 * var(--default-grid-baseline)));
-	border-bottom: 1px solid var(--color-border);
+	border-block-end: 1px solid var(--color-border);
 	line-height: var(--table-cell-line-height, inherit);
 	text-align: start;
 	vertical-align: middle;
@@ -749,15 +750,15 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 // Theming: the header row and the body rows each read their own variables, and
 // every fallback is the value the table has without them
 .ncTable__table > thead > tr > th {
-	border-bottom-color: var(--table-header-border-block-end-color, var(--color-border));
-	border-bottom-width: var(--table-header-border-block-end-width, 1px);
-	border-top: var(--table-header-border-block-start-width, 0) solid var(--table-header-border-block-start-color, transparent);
+	border-block-end-color: var(--table-header-border-block-end-color, var(--color-border));
+	border-block-end-width: var(--table-header-border-block-end-width, 1px);
+	border-block-start: var(--table-header-border-block-start-width, 0) solid var(--table-header-border-block-start-color, transparent);
 	background-color: var(--table-header-background-color, transparent);
 }
 
 .ncTable__table > tbody > tr > td {
-	border-bottom-color: var(--table-row-border-block-end-color, var(--color-border));
-	border-bottom-width: var(--table-row-border-block-end-width, 1px);
+	border-block-end-color: var(--table-row-border-block-end-color, var(--color-border));
+	border-block-end-width: var(--table-row-border-block-end-width, 1px);
 }
 
 // A sortable header is an NcButton, like the sortable headers of the Files app.
@@ -774,7 +775,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 	color: var(--table-header-cell-color, var(--table-header-color, var(--color-text-maxcontrast)));
 
 	&:hover:not(:disabled) {
-		color: var(--color-main-text);
+		color: var(--table-header-hover-color, var(--color-main-text));
 	}
 }
 
@@ -802,10 +803,6 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 .ncTable__actions {
 	width: var(--default-clickable-area);
 	text-align: end;
-}
-
-.ncTable__row > td {
-	background-color: var(--table-row-background-color, transparent);
 }
 
 .ncTable__row:nth-child(odd) > td {
