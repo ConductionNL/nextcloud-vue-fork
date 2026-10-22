@@ -6,7 +6,7 @@
 <docs>
 ### General description
 
-This component renders a row of quick filters above a list or a table, such as "Mine", "Open" and "Overdue". Each filter is a toggle button; the selected one is shown as a primary button. A filter can have an icon and a count, for example the number of items it matches.
+This component renders a row of quick filters above a list or a table, such as "Mine", "Open" and "Overdue". Each filter is a toggle button drawn as a pill, and the selected one is filled with the primary color. A filter can have an icon and a count, for example the number of items it matches.
 
 Pass the filters in `filters` and bind the `id` of the selected filter with `v-model`. A click on the selected filter clears the selection again. With `multiple`, several filters can be selected at once and `v-model` holds an array of ids.
 
@@ -75,19 +75,19 @@ export default {
 
 | Variable | Description |
 |---|---|
-| `--quick-filter-bar-gap` | Space between the filters. Defaults to one grid baseline. |
-| `--quick-filter-bar-filter-color` | Text color of a filter. Defaults to `--color-primary-element-light-text`, like a secondary button. |
-| `--quick-filter-bar-filter-background-color` | Background of a filter. Defaults to `--color-primary-element-light`. |
-| `--quick-filter-bar-filter-border-color` | Border color of a filter. Defaults to `--color-primary-element-light-hover`. |
-| `--quick-filter-bar-filter-border-radius` | Corner radius of a filter. Defaults to the button radius. |
+| `--quick-filter-bar-gap` | Space between the filters. Defaults to two grid baselines. |
+| `--quick-filter-bar-filter-color` | Text color of a filter. Defaults to `--color-main-text`. |
+| `--quick-filter-bar-filter-background-color` | Background of a filter. Defaults to `--color-background-hover`. |
+| `--quick-filter-bar-filter-border-color` | Border color of a filter. Defaults to `--color-border`. |
+| `--quick-filter-bar-filter-border-radius` | Corner radius of a filter. Defaults to `--border-radius-pill`. |
 | `--quick-filter-bar-filter-font-family` | Font of a filter. Inherited by default. |
 | `--quick-filter-bar-filter-font-size` | Font size of a filter. Defaults to `--default-font-size`. |
 | `--quick-filter-bar-filter-font-weight` | Font weight of a filter. Defaults to `--font-weight-element`. |
 | `--quick-filter-bar-filter-hover-color` | Text color of a hovered filter. Defaults to `--quick-filter-bar-filter-color`. |
-| `--quick-filter-bar-filter-hover-background-color` | Background of a hovered filter. Defaults to `--color-primary-element-light-hover`. |
+| `--quick-filter-bar-filter-hover-background-color` | Background of a hovered filter. Defaults to `--color-background-dark`. |
 | `--quick-filter-bar-filter-pressed-color` | Text color of a selected filter. Defaults to `--color-primary-element-text`, like a primary button. |
 | `--quick-filter-bar-filter-pressed-background-color` | Background of a selected filter. Defaults to `--color-primary-element`. |
-| `--quick-filter-bar-filter-pressed-border-color` | Border color of a selected filter. Defaults to `--color-primary-element-hover`. |
+| `--quick-filter-bar-filter-pressed-border-color` | Border color of a selected filter. Defaults to `--color-primary-element`. |
 | `--quick-filter-bar-filter-pressed-hover-background-color` | Background of a hovered selected filter. Defaults to `--color-primary-element-hover`. |
 | `--quick-filter-bar-filter-pressed-font-weight` | Font weight of a selected filter. Defaults to `--quick-filter-bar-filter-font-weight`. |
 
@@ -202,6 +202,7 @@ function toggle(filter: NcQuickFilterBarFilter) {
 				<NcCounterBubble
 					v-if="filter.count !== undefined"
 					:count="filter.count"
+					type="outlined"
 					:active="isSelected(filter)" />
 			</span>
 		</NcButton>
@@ -216,32 +217,32 @@ function toggle(filter: NcQuickFilterBarFilter) {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: var(--quick-filter-bar-gap, var(--default-grid-baseline));
+	gap: var(--quick-filter-bar-gap, calc(2 * var(--default-grid-baseline)));
 }
 
-// Theming on the NcButtons. Every fallback is the value NcButton itself uses for an
-// unpressed (secondary) and a pressed (primary) toggle button. The two classes outrank
-// NcButton's own scoped rules without `!important`.
+// The filters are pills: light grey while not selected and filled with the primary
+// color when selected, like a primary button. The two classes outrank NcButton's own
+// scoped rules without `!important`.
 .ncQuickFilterBar .ncQuickFilterBar__filter:global(.button-vue) {
 	--font-weight-element: var(--quick-filter-bar-filter-font-weight, var(--quick-filter-bar-default-font-weight));
-	color: var(--quick-filter-bar-filter-color, var(--color-primary-element-light-text));
-	background-color: var(--quick-filter-bar-filter-background-color, var(--color-primary-element-light));
-	border-color: var(--quick-filter-bar-filter-border-color, var(--color-primary-element-light-hover));
-	// Corners only: NcButton derives its padding from --button-radius, so the variable must not set that
-	border-radius: var(--quick-filter-bar-filter-border-radius, var(--button-radius));
+	color: var(--quick-filter-bar-filter-color, var(--color-main-text));
+	background-color: var(--quick-filter-bar-filter-background-color, var(--color-background-hover));
+	border-color: var(--quick-filter-bar-filter-border-color, var(--color-border));
+	// Corners only: NcButton derives its padding from --button-radius, so this must not set that
+	border-radius: var(--quick-filter-bar-filter-border-radius, var(--border-radius-pill));
 	font-family: var(--quick-filter-bar-filter-font-family, inherit);
 	font-size: var(--quick-filter-bar-filter-font-size, var(--default-font-size));
 
 	&:hover:not(:disabled) {
-		color: var(--quick-filter-bar-filter-hover-color, var(--quick-filter-bar-filter-color, var(--color-primary-element-light-text)));
-		background-color: var(--quick-filter-bar-filter-hover-background-color, var(--color-primary-element-light-hover));
+		color: var(--quick-filter-bar-filter-hover-color, var(--quick-filter-bar-filter-color, var(--color-main-text)));
+		background-color: var(--quick-filter-bar-filter-hover-background-color, var(--color-background-dark));
 	}
 
 	&[aria-pressed='true'] {
 		--font-weight-element: var(--quick-filter-bar-filter-pressed-font-weight, var(--quick-filter-bar-filter-font-weight, var(--quick-filter-bar-default-font-weight)));
 		color: var(--quick-filter-bar-filter-pressed-color, var(--color-primary-element-text));
 		background-color: var(--quick-filter-bar-filter-pressed-background-color, var(--color-primary-element));
-		border-color: var(--quick-filter-bar-filter-pressed-border-color, var(--color-primary-element-hover));
+		border-color: var(--quick-filter-bar-filter-pressed-border-color, var(--color-primary-element));
 
 		&:hover:not(:disabled) {
 			color: var(--quick-filter-bar-filter-pressed-color, var(--color-primary-element-text));
@@ -254,5 +255,10 @@ function toggle(filter: NcQuickFilterBarFilter) {
 	display: inline-flex;
 	align-items: center;
 	gap: var(--default-grid-baseline);
+}
+
+// The count takes the text color of its filter, dark on a filter and light on the selected one
+.ncQuickFilterBar .ncQuickFilterBar__filter :global(.counter-bubble__counter--outlined) {
+	color: inherit;
 }
 </style>
