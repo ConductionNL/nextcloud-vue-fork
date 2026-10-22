@@ -10,7 +10,9 @@ This component renders a single statistic, such as a number of items on a dashbo
 
 A number is formatted for the user's locale, so `1234` reads as `1,234` or `1.234`. Pass a string instead, for example `'€1,234'` or `'98%'`, to show a value that is already formatted. Extra content, such as a short breakdown, can be put in the default slot below the value.
 
-The `variant` colors the icon and the value. With `href` or `to` the whole statistic becomes a link, for example to the list the number counts. While `loading` is set, a loading icon is shown instead of the value.
+In a narrow space the name wraps, the label moves below the value, and the value moves below the icon when it does not fit next to it.
+
+The `variant` colors the icon and the value. With `href` or `to` the whole statistic becomes a link, for example to the list the number counts. The default slot is then inside the link too, so it must not contain links or buttons. While `loading` is set, a loading icon is shown instead of the value.
 
 The statistic draws no box of its own, so it fits into a card, a dashboard widget or a grid. Put several next to each other with a CSS grid or flexbox.
 
@@ -156,7 +158,7 @@ export default {
 | `--stats-block-value-font-family` | Font of the value. Inherited by default. |
 | `--stats-block-value-font-size` | Font size of the value. Defaults to `28px`. |
 | `--stats-block-value-font-weight` | Font weight of the value. Defaults to bold. |
-| `--stats-block-value-line-height` | Line height of the value. Defaults to `1.1`. |
+| `--stats-block-value-line-height` | Line height of the value, as a number without a unit, so the statistic keeps its height while it loads. Defaults to `1.1`. |
 | `--stats-block-label-color` | Color of the label. Defaults to `--color-text-maxcontrast`. |
 | `--stats-block-label-font-size` | Font size of the label. Inherited by default. |
 | `--stats-block-primary-color` | Color of the icon and the value of the `primary` variant. Defaults to `--color-primary-element`. |
@@ -233,6 +235,7 @@ const props = withDefaults(defineProps<{
 const slots = defineSlots<{
 	/**
 	 * Extra content shown below the value, for example a short breakdown.
+	 * With `href` or `to` it is inside the link, so it must not contain links or buttons.
 	 */
 	default?: Slot
 
@@ -301,6 +304,8 @@ const formattedValue = computed(() => {
 .ncStatsBlock {
 	--stats-block-accent: var(--stats-block-primary-color, var(--color-primary-element));
 	display: flex;
+	// The body moves under the icon only when even the number does not fit next to it
+	flex-wrap: wrap;
 	align-items: center;
 	gap: var(--stats-block-gap, calc(4 * var(--default-grid-baseline)));
 	min-width: 0;
@@ -354,7 +359,7 @@ const formattedValue = computed(() => {
 
 .ncStatsBlock__body {
 	display: flex;
-	flex: 1 1 auto;
+	flex: 1 1 min-content;
 	flex-direction: column;
 	gap: 2px;
 	min-width: 0;
@@ -362,20 +367,22 @@ const formattedValue = computed(() => {
 
 .ncStatsBlock__name {
 	margin: 0;
-	overflow: hidden;
 	color: var(--stats-block-name-color, inherit);
 	font-size: var(--stats-block-name-font-size, inherit);
 	font-weight: var(--stats-block-name-font-weight, bold);
-	white-space: nowrap;
-	text-overflow: ellipsis;
+	overflow-wrap: break-word;
 }
 
 .ncStatsBlock__value {
 	display: flex;
+	// The label moves below the number when there is no room next to it, and does not
+	// count towards the width the body needs next to the icon
+	flex-wrap: wrap;
 	align-items: baseline;
 	gap: calc(1.5 * var(--default-grid-baseline));
 	min-width: 0;
-	min-height: 31px;
+	// One line of the value, so the statistic keeps its height while it loads
+	min-height: calc(var(--stats-block-value-font-size, 28px) * var(--stats-block-value-line-height, 1.1));
 	margin: 0;
 }
 
