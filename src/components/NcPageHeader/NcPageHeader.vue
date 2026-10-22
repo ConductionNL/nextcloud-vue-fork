@@ -119,18 +119,21 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 
 <template>
 	<header :class="$style.ncPageHeader">
-		<div v-if="slots.icon || iconPath" :class="$style.ncPageHeader__icon">
-			<slot name="icon">
-				<NcIconSvgWrapper :path="iconPath" :size="32" />
-			</slot>
-		</div>
-		<div :class="$style.ncPageHeader__text">
-			<component :is="headingTag" :class="$style.ncPageHeader__heading">
-				{{ name }}
-			</component>
-			<p v-if="description" :class="$style.ncPageHeader__description">
-				{{ description }}
-			</p>
+		<!-- The icon and the text never wrap apart; only the actions move to a row of their own -->
+		<div :class="$style.ncPageHeader__main">
+			<div v-if="slots.icon || iconPath" :class="$style.ncPageHeader__icon">
+				<slot name="icon">
+					<NcIconSvgWrapper :path="iconPath" :size="32" />
+				</slot>
+			</div>
+			<div :class="$style.ncPageHeader__text">
+				<component :is="headingTag" :class="$style.ncPageHeader__heading">
+					{{ name }}
+				</component>
+				<p v-if="description" :class="$style.ncPageHeader__description">
+					{{ description }}
+				</p>
+			</div>
 		</div>
 		<div v-if="slots.actions" :class="$style.ncPageHeader__actions">
 			<slot name="actions" />
@@ -147,19 +150,27 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 	margin-block-end: calc(4 * var(--default-grid-baseline));
 }
 
+.ncPageHeader__main {
+	display: flex;
+	flex: 1 1 16rem;
+	align-items: flex-start;
+	gap: calc(3 * var(--default-grid-baseline));
+	min-width: 0;
+}
+
 .ncPageHeader__icon {
 	display: flex;
 	flex-shrink: 0;
 	align-items: center;
 	justify-content: center;
-	min-height: var(--default-clickable-area);
+	// As tall as the heading's first line, so the icon is centered on it
+	min-height: 45px;
 	color: var(--color-primary-element);
 }
 
 .ncPageHeader__text {
-	flex: 1 1 auto;
+	flex: 1 1 0;
 	min-width: 0;
-	align-self: center;
 }
 
 .ncPageHeader__heading {
@@ -181,6 +192,7 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 	flex-wrap: wrap;
 	align-items: center;
 	gap: var(--default-grid-baseline);
-	min-height: var(--default-clickable-area);
+	// As tall as the heading's first line, so the actions are centered on it
+	min-height: 45px;
 }
 </style>
