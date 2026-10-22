@@ -6,7 +6,7 @@
 <docs>
 ### General description
 
-This component renders a row of quick filters above a list or a table, such as "Mine", "Open" and "Overdue". Each filter is a toggle button; the selected one is shown as a primary button. A filter can have an icon and a count, for example the number of items it matches.
+This component renders a row of quick filters above a list or a table, such as "Mine", "Open" and "Overdue". Each filter is a toggle button drawn as a pill, and the selected one is filled with the primary color. A filter can have an icon and a count, for example the number of items it matches.
 
 Pass the filters in `filters` and bind the `id` of the selected filter with `v-model`. A click on the selected filter clears the selection again. With `multiple`, several filters can be selected at once and `v-model` holds an array of ids.
 
@@ -168,6 +168,7 @@ function toggle(filter: NcQuickFilterBarFilter) {
 		<NcButton
 			v-for="filter in filters"
 			:key="filter.id"
+			:class="$style.ncQuickFilterBar__filter"
 			:pressed="isSelected(filter)"
 			size="small"
 			@click="toggle(filter)">
@@ -179,6 +180,7 @@ function toggle(filter: NcQuickFilterBarFilter) {
 				<NcCounterBubble
 					v-if="filter.count !== undefined"
 					:count="filter.count"
+					type="outlined"
 					:active="isSelected(filter)" />
 			</span>
 		</NcButton>
@@ -190,12 +192,44 @@ function toggle(filter: NcQuickFilterBarFilter) {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: var(--default-grid-baseline);
+	gap: calc(2 * var(--default-grid-baseline));
+}
+
+// The filters are pills: light grey while not selected and filled with the primary
+// color when selected, like a primary button. The two classes outrank NcButton's own
+// scoped rules without `!important`.
+.ncQuickFilterBar .ncQuickFilterBar__filter:global(.button-vue) {
+	color: var(--color-main-text);
+	background-color: var(--color-background-hover);
+	border-color: var(--color-border);
+	// Corners only: NcButton derives its padding from --button-radius, so this must not set that
+	border-radius: var(--border-radius-pill);
+
+	&:hover:not(:disabled) {
+		color: var(--color-main-text);
+		background-color: var(--color-background-dark);
+	}
+
+	&[aria-pressed='true'] {
+		color: var(--color-primary-element-text);
+		background-color: var(--color-primary-element);
+		border-color: var(--color-primary-element);
+
+		&:hover:not(:disabled) {
+			color: var(--color-primary-element-text);
+			background-color: var(--color-primary-element-hover);
+		}
+	}
 }
 
 .ncQuickFilterBar__label {
 	display: inline-flex;
 	align-items: center;
 	gap: var(--default-grid-baseline);
+}
+
+// The count takes the text color of its filter, dark on a filter and light on the selected one
+.ncQuickFilterBar .ncQuickFilterBar__filter :global(.counter-bubble__counter--outlined) {
+	color: inherit;
 }
 </style>
