@@ -121,13 +121,13 @@ export default {
 | `--tabs-focus-outline-width` | Width of the focus outline of a tab and the panel. Defaults to `2px`. |
 | `--tabs-focus-outline-offset` | Distance between the focus outline and a tab or the panel. Defaults to `2px`. |
 
-They can be set on the tabs or on any of its parents, for example `body` to restyle all tabs at once. On Nextcloud before 34 the tabs take the older look of the sidebar tabs there, a line below the selected tab, which takes `--tabs-indicator-color`.
+They can be set on the tabs or on any of its parents, for example `body` to restyle all tabs at once. On Nextcloud before 34 the tabs take the older look of the sidebar tabs there, a line below the selected tab. The variables apply there too, with the values of that look as their defaults: no space between the tabs, a padding and corner radius of `--border-radius-small`, the main background for the selected tab, and on hover of the selected tab the light primary colors. `--tabs-indicator-color` and `--tabs-indicator-height` set the line.
 </docs>
 
 <script setup lang="ts">
 import type { Slot } from 'vue'
 
-import { computed, nextTick, ref, useCssModule } from 'vue'
+import { computed, nextTick, ref, useCssModule, watch } from 'vue'
 import { createElementId } from '../../utils/createElementId.ts'
 import { isLegacy34 } from '../../utils/legacy.ts'
 import { isRtl } from '../../utils/rtl.ts'
@@ -149,7 +149,7 @@ export interface NcTabsTab {
 
 /**
  * The `id` of the selected tab.
- * When it does not match an enabled tab, the first enabled tab is shown.
+ * When it does not match an enabled tab, the first enabled tab is shown and becomes the model.
  */
 const modelValue = defineModel<string>()
 
@@ -163,8 +163,15 @@ const props = withDefaults(defineProps<{
 	 * The name of the tabs for assistive technology, for example the name of the item they belong to.
 	 */
 	ariaLabel?: string
+
+	/**
+	 * The id of an element that names the tabs, for example a visible heading.
+	 * Takes precedence over `ariaLabel`.
+	 */
+	ariaLabelledby?: string
 }>(), {
 	ariaLabel: undefined,
+	ariaLabelledby: undefined,
 })
 
 defineEmits<{
@@ -190,6 +197,14 @@ const tabElements = ref<HTMLButtonElement[]>([])
 const enabledTabs = computed(() => props.tabs.filter((tab) => !tab.disabled))
 
 const activeTab = computed(() => enabledTabs.value.find((tab) => tab.id === modelValue.value) ?? enabledTabs.value[0])
+
+// When the model is a disabled, unknown or removed tab, another tab is shown: make that
+// the model, so the parent, and for example the URL, hold the tab that is shown
+watch(activeTab, (tab) => {
+	if (tab && tab.id !== modelValue.value) {
+		modelValue.value = tab.id
+	}
+}, { immediate: true })
 
 /**
  * The id of the tab element of a tab.
@@ -280,6 +295,7 @@ function tabClass(tab: NcTabsTab) {
 		<div
 			role="tablist"
 			:aria-label="ariaLabel"
+			:aria-labelledby="ariaLabelledby"
 			:class="[$style.ncTabs__list, { [$style.ncTabs__list_legacy]: isLegacy34 }]"
 			@keydown="onKeydown">
 			<button
@@ -329,6 +345,9 @@ function tabClass(tab: NcTabsTab) {
 .ncTabs__list {
 	display: flex;
 	gap: var(--tabs-gap, var(--default-grid-baseline));
+	// The row scrolls, so it clips what is outside it: leave room for the focus outline
+	padding-block-start: calc(var(--tabs-focus-outline-width, 2px) + var(--tabs-focus-outline-offset, 2px));
+	padding-inline: calc(var(--tabs-focus-outline-width, 2px) + var(--tabs-focus-outline-offset, 2px));
 	padding-block-end: var(--default-grid-baseline);
 	overflow-x: auto;
 	border-block-end: var(--tabs-border-block-end-width, 1px) solid var(--tabs-border-block-end-color, var(--color-border));
@@ -336,7 +355,7 @@ function tabClass(tab: NcTabsTab) {
 }
 
 .ncTabs__list_legacy {
-	gap: 0;
+	gap: var(--tabs-gap, 0);
 	padding-block-end: 0;
 }
 
@@ -404,11 +423,22 @@ function tabClass(tab: NcTabsTab) {
 	}
 }
 
-// Nextcloud before 34: a line below the selected tab, as the sidebar tabs there
+// Forced colors replace the backgrounds that mark the selected tab, so draw its bar in the
+// system highlight color
+@media (forced-colors: active) {
+	.ncTabs__tab_selected::after {
+		background-color: Highlight;
+		forced-color-adjust: none;
+	}
+}
+
+// Nextcloud before 34: a line below the selected tab, as the sidebar tabs there. The
+// variables still apply, with the values of that look as their defaults.
 .ncTabs__tab_legacy {
-	padding: var(--border-radius-small);
-	border-block-end: var(--default-grid-baseline) solid transparent;
-	border-radius: var(--border-radius-small);
+	padding: var(--tabs-tab-padding, var(--border-radius-small));
+	padding-block-end: var(--tabs-tab-padding-block-end, var(--border-radius-small));
+	border-block-end: var(--tabs-indicator-height, var(--default-grid-baseline)) solid transparent;
+	border-radius: var(--tabs-tab-border-radius, var(--border-radius-small));
 	transition: background-color var(--animation-quick), border-block-end-color var(--animation-quick);
 
 	&::after {
@@ -422,12 +452,12 @@ function tabClass(tab: NcTabsTab) {
 
 		&,
 		&:hover:not(:disabled) {
-			background-color: var(--color-main-background);
+			background-color: var(--tabs-tab-selected-background-color, var(--color-main-background));
 		}
 
 		&:hover:not(:disabled) {
-			color: var(--color-primary-element-light-text);
-			background-color: var(--color-primary-element-light-hover);
+			color: var(--tabs-tab-selected-color, var(--color-primary-element-light-text));
+			background-color: var(--tabs-tab-hover-background-color, var(--color-primary-element-light-hover));
 		}
 	}
 }
@@ -436,22 +466,19 @@ function tabClass(tab: NcTabsTab) {
 	display: flex;
 	align-items: center;
 	gap: var(--default-grid-baseline);
-	max-width: 100%;
 }
 
 .ncTabs__tab_selected .ncTabs__name {
 	font-weight: var(--tabs-tab-selected-font-weight, var(--tabs-tab-font-weight, var(--font-weight-element, normal)));
 }
 
+// A tab is never narrower than its name, the row scrolls instead
 .ncTabs__name {
-	overflow: hidden;
 	font-weight: var(--tabs-tab-font-weight, var(--font-weight-element, normal));
-	white-space: nowrap;
-	text-overflow: ellipsis;
 }
 
 .ncTabs__tab_legacy.ncTabs__tab_selected .ncTabs__name {
-	font-weight: var(--font-weight-element, bold);
+	font-weight: var(--tabs-tab-selected-font-weight, var(--font-weight-element, bold));
 }
 
 .ncTabs__panel {
