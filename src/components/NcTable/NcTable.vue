@@ -221,19 +221,26 @@ The two variables for selected rows have no counterpart in the NL Design System,
 								@update:modelValue="toggleAll" />
 						</th>
 						<th
-							v-for="column in columns"
+							v-for="(column, index) in columns"
 							:key="column.key"
 							scope="col"
 							:class="[$style.ncTable__header, { [$style.ncTable__header_sortable]: column.sortable }, alignClass(column)]"
 							:style="column.width ? { width: column.width } : undefined"
 							:aria-sort="ariaSort(column)"
+							:aria-describedby="column.description && !column.sortable ? descriptionId(index) : undefined"
 							:title="column.description || undefined">
-							<!-- @slot `header-<key>`: the header of column `<key>`, replacing its sort button. Receives the `column`. -->
-							<slot :name="'header-' + column.key" :column="column">
+							<!-- @slot `header-<key>`: the header of column `<key>`, replacing its sort button. Receives the `column`, whether it is `sorted`, the current `sort` and `toggleSort()`, which moves the column's sorting on like the sort button does. -->
+							<slot
+								:name="'header-' + column.key"
+								:column="column"
+								:sorted="isSorted(column)"
+								:sort="sort"
+								:toggleSort="() => toggleSort(column)">
 								<NcButton
 									v-if="column.sortable"
 									:class="$style.ncTable__sort"
 									:alignment="sortAlignment(column)"
+									:aria-describedby="column.description ? descriptionId(index) : undefined"
 									variant="tertiary"
 									@click="toggleSort(column)">
 									<template #icon>
@@ -296,6 +303,12 @@ The two variables for selected rows have no counterpart in the NL Design System,
 					</template>
 				</tbody>
 			</table>
+			<!-- Outside the header cells, so the descriptions do not become part of the column names -->
+			<template v-for="(column, index) in columns" :key="column.key">
+				<span v-if="column.description" :id="descriptionId(index)" hidden>
+					{{ column.description }}
+				</span>
+			</template>
 		</div>
 	</div>
 </template>
@@ -310,6 +323,7 @@ import NcCheckboxRadioSwitch from '../NcCheckboxRadioSwitch/NcCheckboxRadioSwitc
 import NcIconSvgWrapper from '../NcIconSvgWrapper/NcIconSvgWrapper.vue'
 import NcLoadingIcon from '../NcLoadingIcon/NcLoadingIcon.vue'
 import { t } from '../../l10n.ts'
+import { createElementId } from '../../utils/createElementId.ts'
 
 export type NcTableRowKey = string | number
 
@@ -324,7 +338,7 @@ export interface NcTableColumn {
 	width?: string
 	/** How the column's content is aligned */
 	align?: 'start' | 'center' | 'end'
-	/** A longer explanation, shown as the header's tooltip */
+	/** A longer explanation, shown as the header's tooltip and read out as its description */
 	description?: string
 }
 
@@ -421,7 +435,7 @@ const slots = defineSlots<{
 	 * The content of the header of column `<key>`, for example `#header-status`.
 	 * It replaces the sort button of a sortable column.
 	 */
-	[key: `header-${string}`]: Slot<{ column: NcTableColumn }>
+	[key: `header-${string}`]: Slot<{ column: NcTableColumn, sorted: boolean, sort: NcTableSort | null, toggleSort: () => void }>
 
 	/**
 	 * Actions for a row, for example an `NcActions` menu. Adds a trailing column.
@@ -440,6 +454,17 @@ const slots = defineSlots<{
 }>()
 
 const style = useCssModule()
+
+const idPrefix = 'nc-table-' + createElementId()
+
+/**
+ * The id of the hidden description of a column.
+ *
+ * @param index - The index of the column
+ */
+function descriptionId(index: number): string {
+	return `${idPrefix}-description-${index}`
+}
 
 const columnCount = computed(() => props.columns.length + (props.selectable ? 1 : 0) + (slots.rowActions ? 1 : 0))
 
