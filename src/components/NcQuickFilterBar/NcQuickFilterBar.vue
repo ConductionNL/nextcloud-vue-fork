@@ -79,12 +79,21 @@ export default {
 | `--quick-filter-bar-filter-color` | Text color of a filter. Defaults to `--color-main-text`. |
 | `--quick-filter-bar-filter-background-color` | Background of a filter. Defaults to `--color-background-hover`. |
 | `--quick-filter-bar-filter-border-color` | Border color of a filter. Defaults to `--color-border`. |
+| `--quick-filter-bar-filter-border-width` | Border width of a filter. Defaults to `1px 1px 2px`, like a button. |
 | `--quick-filter-bar-filter-border-radius` | Corner radius of a filter. Defaults to `--border-radius-pill`. |
+| `--quick-filter-bar-filter-min-block-size` | Minimum height of a filter. Defaults to the height of a small button. |
+| `--quick-filter-bar-filter-padding-block` | Space above and below the content of a filter, as one or two values. Defaults to `1px 0`. |
+| `--quick-filter-bar-filter-padding-inline` | Space before and after the content of a filter, as one or two values. Defaults to the button padding. |
 | `--quick-filter-bar-filter-font-family` | Font of a filter. Inherited by default. |
 | `--quick-filter-bar-filter-font-size` | Font size of a filter. Defaults to `--default-font-size`. |
 | `--quick-filter-bar-filter-font-weight` | Font weight of a filter. Defaults to `--font-weight-element`. |
+| `--quick-filter-bar-filter-text-transform` | Text transform of a filter, for example `uppercase`. Defaults to `none`. |
 | `--quick-filter-bar-filter-hover-color` | Text color of a hovered filter. Defaults to `--quick-filter-bar-filter-color`. |
 | `--quick-filter-bar-filter-hover-background-color` | Background of a hovered filter. Defaults to `--color-background-dark`. |
+| `--quick-filter-bar-filter-hover-border-color` | Border color of a hovered filter. Defaults to `--quick-filter-bar-filter-border-color`. |
+| `--quick-filter-bar-filter-focus-color` | Text color of a filter focused with the keyboard. Defaults to `--quick-filter-bar-filter-color`. |
+| `--quick-filter-bar-filter-focus-background-color` | Background of a filter focused with the keyboard. Defaults to `--quick-filter-bar-filter-background-color`. |
+| `--quick-filter-bar-filter-focus-border-color` | Border color of a filter focused with the keyboard. Defaults to `--quick-filter-bar-filter-border-color`. |
 | `--quick-filter-bar-filter-pressed-color` | Text color of a selected filter. Defaults to `--color-primary-element-text`, like a primary button. |
 | `--quick-filter-bar-filter-pressed-background-color` | Background of a selected filter. Defaults to `--color-primary-element`. |
 | `--quick-filter-bar-filter-pressed-border-color` | Border color of a selected filter. Defaults to `--color-primary-element`. |
@@ -230,12 +239,26 @@ function toggle(filter: NcQuickFilterBarFilter) {
 	border-color: var(--quick-filter-bar-filter-border-color, var(--color-border));
 	// Corners only: NcButton derives its padding from --button-radius, so this must not set that
 	border-radius: var(--quick-filter-bar-filter-border-radius, var(--border-radius-pill));
+	border-width: var(--quick-filter-bar-filter-border-width, 1px 1px 2px);
+	min-height: var(--quick-filter-bar-filter-min-block-size, var(--button-size));
+	// One variable per axis: NcButton's own padding can be one or two values, which cannot be split per side
+	padding-block: var(--quick-filter-bar-filter-padding-block, 1px 0);
+	padding-inline: var(--quick-filter-bar-filter-padding-inline, var(--button-padding));
 	font-family: var(--quick-filter-bar-filter-font-family, inherit);
 	font-size: var(--quick-filter-bar-filter-font-size, var(--default-font-size));
+	text-transform: var(--quick-filter-bar-filter-text-transform, none);
+
+	// Focus before hover, and as specific, so a hovered filter keeps its hover colors
+	&:focus-visible:not(:disabled) {
+		color: var(--quick-filter-bar-filter-focus-color, var(--quick-filter-bar-filter-color, var(--color-main-text)));
+		background-color: var(--quick-filter-bar-filter-focus-background-color, var(--quick-filter-bar-filter-background-color, var(--color-background-hover)));
+		border-color: var(--quick-filter-bar-filter-focus-border-color, var(--quick-filter-bar-filter-border-color, var(--color-border)));
+	}
 
 	&:hover:not(:disabled) {
 		color: var(--quick-filter-bar-filter-hover-color, var(--quick-filter-bar-filter-color, var(--color-main-text)));
 		background-color: var(--quick-filter-bar-filter-hover-background-color, var(--color-background-dark));
+		border-color: var(--quick-filter-bar-filter-hover-border-color, var(--quick-filter-bar-filter-border-color, var(--color-border)));
 	}
 
 	&[aria-pressed='true'] {

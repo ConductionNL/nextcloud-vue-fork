@@ -302,7 +302,7 @@ export default {
 .vue-crumb {
 	background-image: none;
 	display: inline-flex;
-	height: var(--default-clickable-area);
+	height: var(--breadcrumbs-min-block-size, var(--default-clickable-area));
 	padding: 0;
 
 	&:last-child {
@@ -321,6 +321,11 @@ export default {
 	&__separator {
 		padding: 0;
 		color: var(--breadcrumbs-separator-color, var(--color-text-maxcontrast));
+
+		:deep(svg) {
+			width: var(--breadcrumbs-separator-icon-size, 20px);
+			height: var(--breadcrumbs-separator-icon-size, 20px);
+		}
 	}
 	// Necessary for indicating hovering for drag and drop
 	&#{&}--hovered :deep(.button-vue) {
@@ -330,11 +335,19 @@ export default {
 	// Adjust button style
 	&:not(:last-child) :deep() .button-vue {
 		color: var(--breadcrumbs-link-color, var(--color-text-maxcontrast));
+		background-color: var(--breadcrumbs-link-background-color, transparent);
+		text-decoration: var(--breadcrumbs-link-text-decoration, none);
 
-		&:hover,
-		&:focus {
+		&:hover {
 			background-color: var(--breadcrumbs-link-hover-background-color, var(--color-background-dark));
 			color: var(--breadcrumbs-link-hover-color, var(--color-main-text));
+			text-decoration: var(--breadcrumbs-link-hover-text-decoration, var(--breadcrumbs-link-text-decoration, none));
+		}
+
+		&:focus {
+			background-color: var(--breadcrumbs-link-focus-background-color, var(--breadcrumbs-link-hover-background-color, var(--color-background-dark)));
+			color: var(--breadcrumbs-link-focus-color, var(--breadcrumbs-link-hover-color, var(--color-main-text)));
+			text-decoration: var(--breadcrumbs-link-focus-text-decoration, var(--breadcrumbs-link-text-decoration, none));
 		}
 
 		&__text {
@@ -346,11 +359,16 @@ export default {
 		font-family: var(--breadcrumbs-font-family, inherit);
 		font-size: var(--breadcrumbs-font-size, var(--default-font-size));
 	}
+	&:last-child :deep(.button-vue) {
+		color: var(--breadcrumbs-link-current-color, var(--color-main-text));
+	}
 	&:last-child :deep(.button-vue__text) {
-		font-weight: var(--breadcrumbs-current-font-weight, var(--font-weight-element, bold));
+		font-weight: var(--breadcrumbs-link-current-font-weight, var(--font-weight-element, bold));
 	}
 	:deep(.button-vue__text) {
 		margin: 0;
+		// On the text, which inherits from a button and a link alike
+		line-height: var(--breadcrumbs-line-height, inherit);
 	}
 
 	// Adjust action item appearance for crumbs with actions
