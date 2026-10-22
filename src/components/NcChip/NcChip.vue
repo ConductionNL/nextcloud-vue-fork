@@ -37,7 +37,7 @@ export default {
 
 ### Status
 
-Use `error`, `warning`, `success` and `info` for a status. With `light` the chip gets a light background, which reads better when many chips are shown together, for example one per row of a table. Use `size="small"` to fit a chip into a line of text or a table cell.
+Use `error`, `warning`, `success` and `info` for a status. With `light` the chip gets a light background and its icon the status color, which reads better when many chips are shown together, for example one per row of a table. Use `size="small"` to fit a chip into a line of text or a table cell. The close button of a small chip keeps a clickable area of `24px`, so it reaches a little beyond the chip.
 
 ```vue
 <template>
@@ -116,7 +116,7 @@ export default {
 
 | Variable | Description |
 |---|---|
-| `--chip-size` | Height of the chip, and the size of its icon. Set it on the chip itself. Defaults to `24px`, or `20px` when small. |
+| `--chip-size` | Height of the chip, and the size of the box around its icon. The icon itself stays `18px`, or `16px` when small. Set it on the chip itself with an inline `style`, as the chip's own value wins over a class. Defaults to `24px`, or `20px` when small. |
 | `--chip-border-radius` | Corner radius of the chip. Defaults to half of `--chip-size`, a pill. |
 | `--chip-font-family` | Font of the text. Inherited by default. |
 | `--chip-font-size` | Font size of the text. Inherited by default. |
@@ -141,7 +141,7 @@ export default {
 | `--chip-success-color` | Text color of a `success` chip. Defaults to `--color-success-text`. |
 | `--chip-info-background-color` | Background of an `info` chip. Defaults to `--color-info`. |
 | `--chip-info-color` | Text color of an `info` chip. Defaults to `--color-info-text`. |
-| `--chip-light-color` | Text color of a chip with `light`. Defaults to `--color-main-text`. |
+| `--chip-light-color` | Text color of a light `error`, `warning`, `success` or `info` chip. Defaults to `--color-main-text`. |
 | `--chip-light-error-background-color` | Background of a light `error` chip. Defaults to the error color mixed with the background. |
 | `--chip-light-warning-background-color` | Background of a light `warning` chip. Defaults to the warning color mixed with the background. |
 | `--chip-light-success-background-color` | Background of a light `success` chip. Defaults to the success color mixed with the background. |
@@ -363,24 +363,46 @@ const hasIcon = () => Boolean(props.iconPath || props.iconSvg || !!slots.icon)
 		font-size: var(--chip-small-font-size, var(--font-size-small));
 	}
 
-	// The status color mixed into the background, like NcNoteCard
+	// The status color mixed into the background and the icon in the status text color,
+	// like NcNoteCard. Only the status variants, the others keep their own colors.
 	&--light {
-		color: var(--chip-light-color, var(--color-main-text));
+		&.nc-chip--error,
+		&.nc-chip--warning,
+		&.nc-chip--success,
+		&.nc-chip--info {
+			color: var(--chip-light-color, var(--color-main-text));
+		}
 
 		&.nc-chip--error {
 			background-color: var(--chip-light-error-background-color, color-mix(in srgb, var(--color-error), var(--color-main-background) 80%));
+
+			.nc-chip__icon {
+				color: var(--color-error-text);
+			}
 		}
 
 		&.nc-chip--warning {
 			background-color: var(--chip-light-warning-background-color, color-mix(in srgb, var(--color-warning), var(--color-main-background) 80%));
+
+			.nc-chip__icon {
+				color: var(--color-warning-text);
+			}
 		}
 
 		&.nc-chip--success {
 			background-color: var(--chip-light-success-background-color, color-mix(in srgb, var(--color-success), var(--color-main-background) 80%));
+
+			.nc-chip__icon {
+				color: var(--color-success-text);
+			}
 		}
 
 		&.nc-chip--info {
 			background-color: var(--chip-light-info-background-color, color-mix(in srgb, var(--color-info), var(--color-main-background) 80%));
+
+			.nc-chip__icon {
+				color: var(--color-info-text);
+			}
 		}
 	}
 
@@ -421,11 +443,14 @@ const hasIcon = () => Boolean(props.iconPath || props.iconSvg || !!slots.icon)
 	}
 
 	&__actions {
+		// Adjust action size to match chip size, but keep it at least 24px to click or
+		// tap; on a smaller chip it overlaps the edges without making the chip taller
+		--chip-actions-size: max(24px, var(--chip-size));
 		// Do neither grow nor shrink, size is fixed
-		flex: 0 0 var(--chip-size);
-		// Adjust action size to match chip size
-		--default-clickable-area: var(--chip-size);
-		--border-radius-element: var(--chip-radius);
+		flex: 0 0 var(--chip-actions-size);
+		margin-block: calc((var(--chip-size) - var(--chip-actions-size)) / 2);
+		--default-clickable-area: var(--chip-actions-size);
+		--border-radius-element: var(--chip-border-radius, var(--chip-radius));
 	}
 }
 </style>
