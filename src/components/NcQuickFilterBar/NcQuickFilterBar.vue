@@ -205,7 +205,7 @@ function toggle(filter: NcQuickFilterBarFilter) {
 	// Corners only: NcButton derives its padding from --button-radius, so this must not set that
 	border-radius: var(--border-radius-pill);
 
-	&:hover:not(:disabled) {
+	&:hover:not(:disabled, [aria-pressed='true']) {
 		color: var(--color-main-text);
 		background-color: var(--color-background-dark);
 	}
@@ -218,6 +218,14 @@ function toggle(filter: NcQuickFilterBarFilter) {
 		&:hover:not(:disabled) {
 			color: var(--color-primary-element-text);
 			background-color: var(--color-primary-element-hover);
+		}
+
+		// Forced colors replace the colors that mark the selected filter, so use the system highlight
+		@media (forced-colors: active) {
+			forced-color-adjust: none;
+			color: HighlightText;
+			background-color: Highlight;
+			border-color: Highlight;
 		}
 	}
 }
