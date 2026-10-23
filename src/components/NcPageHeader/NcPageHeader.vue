@@ -195,6 +195,7 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 	min-width: 0;
 }
 
+// The defaults are those of an h2 in the server's core/css/apps.scss, which has no variables for them
 .ncPageHeader__heading {
 	margin-block: var(--page-header-heading-margin-block-start, 0) var(--page-header-heading-margin-block-end, 0);
 	margin-inline: 0;
