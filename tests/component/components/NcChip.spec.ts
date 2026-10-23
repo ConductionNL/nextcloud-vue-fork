@@ -39,3 +39,8 @@ test('the close button follows the border radius of the chip', async ({ mount, p
 	await mount(NcChip, { props: { text: 'Square', style: '--chip-border-radius: 4px' } })
 	await expect(page.getByRole('button')).toHaveCSS('border-radius', '4px')
 })
+
+test('the close button of a small chip stays round', async ({ mount, page }) => {
+	await mount(NcChip, { props: { text: 'Small', size: 'small' } })
+	await expect(page.getByRole('button')).toHaveCSS('border-radius', '12px')
+})
