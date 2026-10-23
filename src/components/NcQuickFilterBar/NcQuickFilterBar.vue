@@ -88,12 +88,12 @@ export default {
 | `--quick-filter-bar-filter-font-size` | Font size of a filter. Defaults to `--default-font-size`. |
 | `--quick-filter-bar-filter-font-weight` | Font weight of a filter. Defaults to `--font-weight-element`. |
 | `--quick-filter-bar-filter-text-transform` | Text transform of a filter, for example `uppercase`. Defaults to `none`. |
-| `--quick-filter-bar-filter-hover-color` | Text color of a hovered filter. Defaults to `--quick-filter-bar-filter-color`. |
-| `--quick-filter-bar-filter-hover-background-color` | Background of a hovered filter. Defaults to `--color-background-dark`. |
-| `--quick-filter-bar-filter-hover-border-color` | Border color of a hovered filter. Defaults to `--quick-filter-bar-filter-border-color`. |
-| `--quick-filter-bar-filter-focus-color` | Text color of a filter focused with the keyboard. Defaults to `--quick-filter-bar-filter-color`. |
-| `--quick-filter-bar-filter-focus-background-color` | Background of a filter focused with the keyboard. Defaults to `--quick-filter-bar-filter-background-color`. |
-| `--quick-filter-bar-filter-focus-border-color` | Border color of a filter focused with the keyboard. Defaults to `--quick-filter-bar-filter-border-color`. |
+| `--quick-filter-bar-filter-hover-color` | Text color of a hovered unselected filter. Defaults to `--quick-filter-bar-filter-color`. |
+| `--quick-filter-bar-filter-hover-background-color` | Background of a hovered unselected filter. Defaults to `--color-background-dark`. |
+| `--quick-filter-bar-filter-hover-border-color` | Border color of a hovered unselected filter. Defaults to `--quick-filter-bar-filter-border-color`. |
+| `--quick-filter-bar-filter-focus-color` | Text color of an unselected filter focused with the keyboard. Defaults to `--quick-filter-bar-filter-color`. |
+| `--quick-filter-bar-filter-focus-background-color` | Background of an unselected filter focused with the keyboard. Defaults to `--quick-filter-bar-filter-background-color`. |
+| `--quick-filter-bar-filter-focus-border-color` | Border color of an unselected filter focused with the keyboard. Defaults to `--quick-filter-bar-filter-border-color`. |
 | `--quick-filter-bar-filter-pressed-color` | Text color of a selected filter. Defaults to `--color-primary-element-text`, like a primary button. |
 | `--quick-filter-bar-filter-pressed-background-color` | Background of a selected filter. Defaults to `--color-primary-element`. |
 | `--quick-filter-bar-filter-pressed-border-color` | Border color of a selected filter. Defaults to `--color-primary-element`. |
@@ -248,14 +248,15 @@ function toggle(filter: NcQuickFilterBarFilter) {
 	font-size: var(--quick-filter-bar-filter-font-size, var(--default-font-size));
 	text-transform: var(--quick-filter-bar-filter-text-transform, none);
 
-	// Focus before hover, and as specific, so a hovered filter keeps its hover colors
-	&:focus-visible:not(:disabled) {
+	// Focus before hover, and as specific, so a hovered filter keeps its hover colors. Both
+	// leave a selected filter alone, so it keeps its own colors while focused or hovered.
+	&:focus-visible:not(:disabled, [aria-pressed='true']) {
 		color: var(--quick-filter-bar-filter-focus-color, var(--quick-filter-bar-filter-color, var(--color-main-text)));
 		background-color: var(--quick-filter-bar-filter-focus-background-color, var(--quick-filter-bar-filter-background-color, var(--color-background-hover)));
 		border-color: var(--quick-filter-bar-filter-focus-border-color, var(--quick-filter-bar-filter-border-color, var(--color-border)));
 	}
 
-	&:hover:not(:disabled) {
+	&:hover:not(:disabled, [aria-pressed='true']) {
 		color: var(--quick-filter-bar-filter-hover-color, var(--quick-filter-bar-filter-color, var(--color-main-text)));
 		background-color: var(--quick-filter-bar-filter-hover-background-color, var(--color-background-dark));
 		border-color: var(--quick-filter-bar-filter-hover-border-color, var(--quick-filter-bar-filter-border-color, var(--color-border)));
@@ -270,6 +271,14 @@ function toggle(filter: NcQuickFilterBarFilter) {
 		&:hover:not(:disabled) {
 			color: var(--quick-filter-bar-filter-pressed-color, var(--color-primary-element-text));
 			background-color: var(--quick-filter-bar-filter-pressed-hover-background-color, var(--color-primary-element-hover));
+		}
+
+		// Forced colors replace the colors that mark the selected filter, so use the system highlight
+		@media (forced-colors: active) {
+			forced-color-adjust: none;
+			color: HighlightText;
+			background-color: Highlight;
+			border-color: Highlight;
 		}
 	}
 }
