@@ -317,19 +317,19 @@ const formattedValue = computed(() => {
 }
 
 .ncStatsBlock_info {
-	--stats-block-accent: var(--stats-block-info-color, var(--color-text-info, var(--color-info-text)));
+	--stats-block-accent: var(--stats-block-info-color, var(--color-info-text));
 }
 
 .ncStatsBlock_success {
-	--stats-block-accent: var(--stats-block-success-color, var(--color-text-success, var(--color-success-text)));
+	--stats-block-accent: var(--stats-block-success-color, var(--color-success-text));
 }
 
 .ncStatsBlock_warning {
-	--stats-block-accent: var(--stats-block-warning-color, var(--color-text-warning, var(--color-warning-text)));
+	--stats-block-accent: var(--stats-block-warning-color, var(--color-warning-text));
 }
 
 .ncStatsBlock_error {
-	--stats-block-accent: var(--stats-block-error-color, var(--color-text-error, var(--color-error-text)));
+	--stats-block-accent: var(--stats-block-error-color, var(--color-error-text));
 }
 
 .ncStatsBlock_link {
