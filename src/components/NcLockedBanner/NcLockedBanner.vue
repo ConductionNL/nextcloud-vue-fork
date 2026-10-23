@@ -82,7 +82,7 @@ export default {
 | `--locked-banner-icon-inset-block-start` | Space above the padlock, to line it up with the message. Defaults to `0`. |
 | `--locked-banner-font-family` | Font of the banner. Inherited by default. |
 | `--locked-banner-message-font-weight` | Font weight of the message. Defaults to bold. |
-| `--locked-banner-expiry-color` | Color of the line about when the lock expires. Defaults to `--color-text-maxcontrast`. |
+| `--locked-banner-expiry-color` | Color of the line about when the lock expires. Defaults to `--color-text-maxcontrast`, and on the banner for a lock someone else holds to its text color, as the grey is too light on the error background. |
 
 They can be set on the banner or on any of its parents, for example `body` to restyle every locked banner at once. The names follow the alert tokens of the NL Design System: a lock the current user holds is the plain alert, a lock someone else holds the error alert.
 </docs>
@@ -231,6 +231,9 @@ function onUnlock() {
 	--locked-banner-tone-background: var(--locked-banner-error-background-color, var(--color-error));
 	--locked-banner-tone-color: var(--locked-banner-error-color, var(--color-main-text));
 	--locked-banner-tone-icon: var(--locked-banner-icon-error-color, var(--locked-banner-tone-border));
+	// The grey of --color-text-maxcontrast is too light on the error background before
+	// Nextcloud 32 and only just enough after, so the expiry takes the text color
+	--locked-banner-tone-expiry: var(--locked-banner-tone-color);
 }
 
 // Before Nextcloud 32 the error color is strong, so it is mixed into the background like NcNoteCard does
@@ -244,6 +247,7 @@ function onUnlock() {
 	--locked-banner-tone-background: var(--locked-banner-background-color, var(--color-background-hover));
 	--locked-banner-tone-color: var(--locked-banner-color, var(--color-main-text));
 	--locked-banner-tone-icon: var(--locked-banner-icon-color, var(--locked-banner-tone-border));
+	--locked-banner-tone-expiry: var(--color-text-maxcontrast);
 }
 
 .ncLockedBanner__icon {
@@ -264,7 +268,7 @@ function onUnlock() {
 
 .ncLockedBanner__expiry {
 	margin: var(--locked-banner-message-row-gap, var(--default-grid-baseline)) 0 0;
-	color: var(--locked-banner-expiry-color, var(--color-text-maxcontrast));
+	color: var(--locked-banner-expiry-color, var(--locked-banner-tone-expiry));
 }
 
 .ncLockedBanner__action {
