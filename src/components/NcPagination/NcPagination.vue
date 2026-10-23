@@ -294,7 +294,8 @@ A disabled relative link is washed out like a disabled button. When the disabled
 import type { RouteLocationRaw } from 'vue-router'
 
 import { mdiChevronLeft, mdiChevronRight, mdiPageFirst, mdiPageLast } from '@mdi/js'
-import { computed, nextTick, useTemplateRef, watch, watchPostEffect } from 'vue'
+import { computed, inject, nextTick, useTemplateRef, watch, watchPostEffect } from 'vue'
+import { routerKey } from 'vue-router'
 import NcButton from '../NcButton/NcButton.vue'
 import NcIconSvgWrapper from '../NcIconSvgWrapper/NcIconSvgWrapper.vue'
 import NcSelect from '../NcSelect/NcSelect.vue'
@@ -352,7 +353,7 @@ const props = withDefaults(defineProps<{
 	/**
 	 * Returns the Vue Router route of a page, to render the pages as router links.
 	 * A link does not change the page itself: pass the page from the route as `page`.
-	 * Takes precedence over `pageHref`.
+	 * Takes precedence over `pageHref`. Without a router it is ignored.
 	 */
 	pageTo?: (page: number) => RouteLocationRaw
 }>(), {
@@ -383,7 +384,9 @@ const navElement = useTemplateRef<HTMLElement>('nav')
 const totalPages = computed(() => Math.max(1, Math.ceil(props.totalItems / Math.max(1, pageSize.value))))
 const isFirstPage = computed(() => page.value <= 1)
 const isLastPage = computed(() => page.value >= totalPages.value)
-const isLink = computed(() => Boolean(props.pageHref || props.pageTo))
+// Like NcButton: `page-to` only makes links with a router, else the pages stay buttons
+const hasVueRouterContext = inject(routerKey, null) !== null
+const isLink = computed(() => Boolean(props.pageHref || (props.pageTo && hasVueRouterContext)))
 
 // Step back to the last page when the current one does not exist, also when mounted
 // with one. While there are no items, for example while they load, a page from the
@@ -456,7 +459,7 @@ function linkProps(target: number, disabled = false) {
 	if (!isLink.value || disabled) {
 		return {}
 	}
-	return { href: props.pageHref?.(target), to: props.pageTo?.(target) }
+	return { href: props.pageHref?.(target), to: hasVueRouterContext ? props.pageTo?.(target) : undefined }
 }
 
 /**
