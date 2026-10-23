@@ -21,7 +21,7 @@ Renders a button element when given no redirection props, otherwise, renders <a/
 		draggable="false"
 		@dragstart.prevent="() => { /** Prevent the breadcrumb from being draggable. */ }"
 		@drop.prevent="dropped"
-		@dragover.prevent="() => {}"
+		@dragover.prevent="dragOver"
 		@dragenter="dragEnter"
 		@dragleave="dragLeave">
 		<NcButton
@@ -244,6 +244,18 @@ export default {
 		},
 
 		/**
+		 * Show the dragged item whether it can be dropped here: with dropping disabled,
+		 * the browser shows that it cannot and does not fire the drop.
+		 *
+		 * @param {DragEvent} e The drag-over event
+		 */
+		dragOver(e) {
+			if (this.disableDrop && e.dataTransfer) {
+				e.dataTransfer.dropEffect = 'none'
+			}
+		},
+
+		/**
 		 * Add the hovering state on drag enter
 		 *
 		 * @param {DragEvent} e The drag-enter event
@@ -290,7 +302,7 @@ export default {
 .vue-crumb {
 	background-image: none;
 	display: inline-flex;
-	height: var(--default-clickable-area);
+	height: var(--breadcrumbs-min-block-size, var(--default-clickable-area));
 	padding: 0;
 
 	&:last-child {
@@ -308,29 +320,60 @@ export default {
 	}
 	&__separator {
 		padding: 0;
-		color: var(--color-text-maxcontrast);
+		color: var(--breadcrumbs-separator-color, var(--color-text-maxcontrast));
+
+		:deep(svg) {
+			width: var(--breadcrumbs-separator-icon-size, 20px);
+			height: var(--breadcrumbs-separator-icon-size, 20px);
+		}
 	}
-	// Necessary for indicating hovering for drag and drop
-	&#{&}--hovered :deep(.button-vue) {
-		background-color: var(--color-background-dark);
-		color: var(--color-main-text);
+	// The background of a link, without raising the specificity, so the drag over state
+	// below wins. Not on the overflow menu, so it keeps the background it has when open.
+	&:where(:not(:last-child, .dropdown)) :deep() .button-vue {
+		background-color: var(--breadcrumbs-link-background-color, transparent);
 	}
 	// Adjust button style
 	&:not(:last-child) :deep() .button-vue {
-		color: var(--color-text-maxcontrast);
+		color: var(--breadcrumbs-link-color, var(--color-text-maxcontrast));
+		text-decoration: var(--breadcrumbs-link-text-decoration, none);
 
-		&:hover,
+		&:hover {
+			background-color: var(--breadcrumbs-link-hover-background-color, var(--color-background-dark));
+			color: var(--breadcrumbs-link-hover-color, var(--color-main-text));
+			text-decoration: var(--breadcrumbs-link-hover-text-decoration, var(--breadcrumbs-link-text-decoration, none));
+		}
+
 		&:focus {
-			background-color: var(--color-background-dark);
-			color: var(--color-main-text);
+			background-color: var(--breadcrumbs-link-focus-background-color, var(--breadcrumbs-link-hover-background-color, var(--color-background-dark)));
+			color: var(--breadcrumbs-link-focus-color, var(--breadcrumbs-link-hover-color, var(--color-main-text)));
+			text-decoration: var(--breadcrumbs-link-focus-text-decoration, var(--breadcrumbs-link-text-decoration, none));
 		}
 
 		&__text {
-			font-weight: var(--font-weight-element, normal);
+			font-weight: var(--breadcrumbs-link-font-weight, var(--font-weight-element, normal));
 		}
+	}
+	// The font of every crumb, and the current location: the last crumb
+	:deep(.button-vue) {
+		font-family: var(--breadcrumbs-font-family, inherit);
+		font-size: var(--breadcrumbs-font-size, var(--default-font-size));
+	}
+	&:last-child :deep(.button-vue) {
+		color: var(--breadcrumbs-link-current-color, var(--color-main-text));
+	}
+	&:last-child :deep(.button-vue__text) {
+		font-weight: var(--breadcrumbs-link-current-font-weight, var(--font-weight-element, bold));
 	}
 	:deep(.button-vue__text) {
 		margin: 0;
+		// On the text, which inherits from a button and a link alike
+		line-height: var(--breadcrumbs-line-height, inherit);
+	}
+	// Necessary for indicating hovering for drag and drop. After the button style, and as
+	// specific, so it wins over the colors of a link and of the current location.
+	&#{&}--hovered :deep(.button-vue) {
+		background-color: var(--color-background-dark);
+		color: var(--color-main-text);
 	}
 
 	// Adjust action item appearance for crumbs with actions
