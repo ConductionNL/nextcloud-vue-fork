@@ -173,6 +173,7 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 	min-width: 0;
 }
 
+// The size of an h2 in the server's core/css/apps.scss, which has no variables for it
 .ncPageHeader__heading {
 	margin: 0;
 	color: var(--color-main-text);
