@@ -8,9 +8,11 @@
 
 This component renders a banner that says an item is locked and by whom, for example at the top of the page of the item. It looks like an `NcNoteCard`.
 
-A lock held by someone else is shown as an error, because the item cannot be edited until the lock is released. A lock the current user holds is shown as a neutral note with an **Unlock** button, so they can release a lock they may have forgotten about. The button emits `unlock`; release the lock in the app and set `unlocking` while that is in progress.
+A lock held by someone else is shown as an error, because the item cannot be edited until the lock is released. A lock the current user holds is shown as a neutral note with an **Unlock** button, so they can release a lock they may have forgotten about. The button emits `unlock`; release the lock in the app and set `unlocking` while that is in progress. The button keeps the keyboard focus while unlocking, but once the banner is removed, move the focus somewhere sensible, for example to the editor.
 
-With `expires-at` the banner also says when the lock expires, as a relative time that updates by itself. Render the banner only for a locked item, for example with `v-if`.
+With `expires-at` the banner also says when the lock expires, as a relative time that updates by itself. It takes a `Date`, an ISO date string or a timestamp in milliseconds; convert Unix seconds to milliseconds first.
+
+A lock held by someone else is announced to assistive technology right away, a lock the current user holds is not. The expiry line is not announced as it updates. Render the banner only for a locked item, for example with `v-if`.
 
 ### Usage
 
@@ -80,7 +82,7 @@ export default {
 | `--locked-banner-icon-inset-block-start` | Space above the padlock, to line it up with the message. Defaults to `0`. |
 | `--locked-banner-font-family` | Font of the banner. Inherited by default. |
 | `--locked-banner-message-font-weight` | Font weight of the message. Defaults to bold. |
-| `--locked-banner-expiry-color` | Color of the line about when the lock expires. Defaults to `--color-text-maxcontrast`. |
+| `--locked-banner-expiry-color` | Color of the line about when the lock expires. Defaults to `--color-text-maxcontrast`, and on the banner for a lock someone else holds to its text color, as the grey is too light on the error background. |
 
 They can be set on the banner or on any of its parents, for example `body` to restyle every locked banner at once. The names follow the alert tokens of the NL Design System: a lock the current user holds is the plain alert, a lock someone else holds the error alert.
 </docs>
@@ -109,12 +111,12 @@ const props = withDefaults(defineProps<{
 	lockedByMe?: boolean
 
 	/**
-	 * When the lock expires, as a date or a timestamp in milliseconds.
+	 * When the lock expires, as a date, an ISO date string or a timestamp in milliseconds.
 	 */
-	expiresAt?: Date | number
+	expiresAt?: Date | string | number
 
 	/**
-	 * Whether the lock is being released. Disables the unlock button and shows a loading icon on it.
+	 * Whether the lock is being released. The unlock button then ignores clicks and shows a loading icon.
 	 */
 	unlocking?: boolean
 
@@ -134,7 +136,11 @@ const emit = defineEmits<{
 	unlock: []
 }>()
 
-const relativeExpiry = useFormatRelativeTime(() => props.expiresAt ?? Date.now())
+// Without an expiry there is nothing to show, so the time does not need to update
+const relativeExpiry = useFormatRelativeTime(
+	() => (props.expiresAt === undefined ? Date.now() : new Date(props.expiresAt)),
+	() => ({ update: props.expiresAt !== undefined }),
+)
 
 const message = computed(() => {
 	if (props.lockedByMe) {
@@ -155,20 +161,32 @@ const expiry = computed(() => {
 	if (new Date(props.expiresAt).getTime() <= Date.now()) {
 		return t('The lock has expired')
 	}
+	// TRANSLATORS: {time} is a relative time, for example "in 20 minutes"
 	return t('The lock expires {time}', { time })
 })
+
+/**
+ * Ask to release the lock, unless that is already in progress. The button is not
+ * disabled meanwhile, so it keeps the keyboard focus.
+ */
+function onUnlock() {
+	if (!props.unlocking) {
+		emit('unlock')
+	}
+}
 </script>
 
 <template>
 	<div
 		:class="[$style.ncLockedBanner, lockedByMe ? $style.ncLockedBanner_mine : $style.ncLockedBanner_other, { [$style.ncLockedBanner_legacy]: isLegacy }]"
-		:role="lockedByMe ? 'status' : 'alert'">
+		:role="lockedByMe ? 'note' : undefined">
 		<NcIconSvgWrapper
 			:class="$style.ncLockedBanner__icon"
 			:path="lockedByMe ? mdiLockOutline : mdiLockAlertOutline"
 			:size="20" />
 		<div :class="$style.ncLockedBanner__text">
-			<p :class="$style.ncLockedBanner__message">
+			<!-- Only the message is a live region: the expiry line below it updates by itself -->
+			<p :class="$style.ncLockedBanner__message" :role="lockedByMe ? undefined : 'alert'">
 				{{ message }}
 			</p>
 			<p v-if="expiry" :class="$style.ncLockedBanner__expiry">
@@ -178,10 +196,10 @@ const expiry = computed(() => {
 		<NcButton
 			v-if="lockedByMe && !hideUnlock"
 			:class="$style.ncLockedBanner__action"
-			:disabled="unlocking"
-			@click="emit('unlock')">
+			:aria-disabled="unlocking ? 'true' : undefined"
+			@click="onUnlock">
 			<template #icon>
-				<NcLoadingIcon v-if="unlocking" :size="20" />
+				<NcLoadingIcon v-if="unlocking" :name="t('Unlocking …')" :size="20" />
 				<NcIconSvgWrapper v-else :path="mdiLockOpenVariantOutline" :size="20" />
 			</template>
 			{{ t('Unlock') }}
@@ -213,6 +231,9 @@ const expiry = computed(() => {
 	--locked-banner-tone-background: var(--locked-banner-error-background-color, var(--color-error));
 	--locked-banner-tone-color: var(--locked-banner-error-color, var(--color-main-text));
 	--locked-banner-tone-icon: var(--locked-banner-icon-error-color, var(--locked-banner-tone-border));
+	// The grey of --color-text-maxcontrast is too light on the error background before
+	// Nextcloud 32 and only just enough after, so the expiry takes the text color
+	--locked-banner-tone-expiry: var(--locked-banner-tone-color);
 }
 
 // Before Nextcloud 32 the error color is strong, so it is mixed into the background like NcNoteCard does
@@ -226,6 +247,7 @@ const expiry = computed(() => {
 	--locked-banner-tone-background: var(--locked-banner-background-color, var(--color-background-hover));
 	--locked-banner-tone-color: var(--locked-banner-color, var(--color-main-text));
 	--locked-banner-tone-icon: var(--locked-banner-icon-color, var(--locked-banner-tone-border));
+	--locked-banner-tone-expiry: var(--color-text-maxcontrast);
 }
 
 .ncLockedBanner__icon {
@@ -246,7 +268,7 @@ const expiry = computed(() => {
 
 .ncLockedBanner__expiry {
 	margin: var(--locked-banner-message-row-gap, var(--default-grid-baseline)) 0 0;
-	color: var(--locked-banner-expiry-color, var(--color-text-maxcontrast));
+	color: var(--locked-banner-expiry-color, var(--locked-banner-tone-expiry));
 }
 
 .ncLockedBanner__action {

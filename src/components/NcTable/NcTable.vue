@@ -12,7 +12,7 @@ Pass the columns as `columns` and the data as `rows`. Each row needs a unique va
 
 The component does not load, sort or filter any data itself. Bind the sorting with `v-model:sort`: a click on a sortable header cycles it through ascending, descending and unsorted, and the table emits the new sorting. Sort or load the rows accordingly.
 
-With `selectable`, every row gets a checkbox and the header a checkbox for all rows. Bind the keys of the selected rows with `v-model:selected`.
+With `selectable`, every row gets a checkbox and the header a checkbox for all rows. Bind the keys of the selected rows with `v-model:selected`. Each checkbox is labeled with the name of its row, the value of the first column unless `row-label` returns another one. The selection outlives `rows`: keys of rows that are filtered out or on another page stay selected, also when all rows are selected or deselected, and the checkbox for all rows only looks at the rows that are shown. Remove those keys from `selected` when the selection should only hold rows that are shown.
 
 Give every table a `caption`. It names the table for assistive technology and is not shown. When the table is wider than its container, it scrolls sideways and can be reached with the keyboard to do so.
 
@@ -65,6 +65,8 @@ export default {
 
 Override a cell with the `#cell-<key>` slot, which receives the row and its value. The `#rowActions` slot adds a trailing column, for example for an `NcActions` menu per row.
 
+A click on a row, outside the controls in it, emits `rowClick`. It is a shortcut for mouse users only: a row cannot be focused, so keyboard and screen reader users cannot click it. Always give a row a real link or button for its main action as well, for example in the name cell, and use a link when the action navigates, so it can be opened in a new tab. A click that ends a text selection does not emit `rowClick`. The rows show a pointer when `rowClick` is listened to; a listener that is added or removed later only shows once the table renders again.
+
 ```vue
 <template>
 	<div>
@@ -74,7 +76,13 @@ Override a cell with the `#cell-<key>` slot, which receives the row and its valu
 			caption="Documents"
 			selectable
 			:columns="columns"
-			:rows="rows">
+			:rows="rows"
+			@row-click="(row) => opened = row.name">
+			<template #cell-name="{ row, value }">
+				<NcButton variant="tertiary" @click="opened = row.name">
+					{{ value }}
+				</NcButton>
+			</template>
 			<template #cell-status="{ value }">
 				<NcChip :text="value" :variant="value === 'Published' ? 'success' : 'secondary'" no-close />
 			</template>
@@ -186,6 +194,7 @@ The table can be restyled with the CSS variables below, set on the table or on a
 | `--table-row-alternate-even-color` | Text color of the even rows. Defaults to `--table-data-cell-color`. |
 | `--table-row-padding-inline-start` | Padding before the first cell of a row. Defaults to `--table-cell-padding-inline-start`. |
 | `--table-row-padding-inline-end` | Padding after the last cell of a row. Defaults to `--table-cell-padding-inline-end`. |
+| `--table-header-hover-color` | Text color of a hovered sortable header. Defaults to `--color-main-text`; set it with a dark `--table-header-background-color`. |
 
 The two variables for selected rows have no counterpart in the NL Design System, which has no selectable rows.
 </docs>
@@ -199,7 +208,7 @@ The two variables for selected rows have no counterpart in the NL Design System,
 			:role="overflowing ? 'group' : undefined"
 			:aria-label="overflowing ? caption : undefined">
 			<table :class="$style.ncTable__table" :aria-busy="loading ? 'true' : undefined">
-				<caption v-if="caption" class="hidden-visually">
+				<caption class="hidden-visually">
 					{{ caption }}
 				</caption>
 				<thead>
@@ -213,19 +222,26 @@ The two variables for selected rows have no counterpart in the NL Design System,
 								@update:modelValue="toggleAll" />
 						</th>
 						<th
-							v-for="column in columns"
+							v-for="(column, index) in columns"
 							:key="column.key"
 							scope="col"
 							:class="[$style.ncTable__header, { [$style.ncTable__header_sortable]: column.sortable }, alignClass(column)]"
 							:style="column.width ? { width: column.width } : undefined"
 							:aria-sort="ariaSort(column)"
+							:aria-describedby="column.description && !column.sortable ? descriptionId(index) : undefined"
 							:title="column.description || undefined">
-							<!-- @slot `header-<key>`: the header of column `<key>`, replacing its sort button. Receives the `column`. -->
-							<slot :name="'header-' + column.key" :column="column">
+							<!-- @slot `header-<key>`: the header of column `<key>`, replacing its sort button. Receives the `column`, whether it is `sorted`, the current `sort` and `toggleSort()`, which moves the column's sorting on like the sort button does. -->
+							<slot
+								:name="'header-' + column.key"
+								:column="column"
+								:sorted="isSorted(column)"
+								:sort="sort"
+								:toggleSort="() => toggleSort(column)">
 								<NcButton
 									v-if="column.sortable"
 									:class="$style.ncTable__sort"
 									:alignment="sortAlignment(column)"
+									:aria-describedby="column.description ? descriptionId(index) : undefined"
 									variant="tertiary"
 									@click="toggleSort(column)">
 									<template #icon>
@@ -263,12 +279,12 @@ The two variables for selected rows have no counterpart in the NL Design System,
 						<tr
 							v-for="row in rows"
 							:key="keyOf(row)"
-							:class="[$style.ncTable__row, { [$style.ncTable__row_selected]: isSelected(row) }]"
+							:class="[$style.ncTable__row, { [$style.ncTable__row_selected]: isSelected(row), [$style.ncTable__row_clickable]: hasRowClickListener() }]"
 							@click="onRowClick(row, $event)">
 							<td v-if="selectable" :class="$style.ncTable__check">
 								<NcCheckboxRadioSwitch
 									:modelValue="isSelected(row)"
-									:aria-label="t('Select row')"
+									:aria-label="checkboxLabel(row)"
 									@update:modelValue="toggleRow(row, $event)" />
 							</td>
 							<td
@@ -287,20 +303,27 @@ The two variables for selected rows have no counterpart in the NL Design System,
 					</template>
 				</tbody>
 			</table>
+			<!-- Outside the header cells, so the descriptions do not become part of the column names -->
+			<template v-for="(column, index) in columns" :key="column.key">
+				<span v-if="column.description" :id="descriptionId(index)" hidden>
+					{{ column.description }}
+				</span>
+			</template>
 		</div>
 	</div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="Row extends Record<string, any>">
 import type { Slot } from 'vue'
 
 import { mdiMenuDown, mdiMenuSwap, mdiMenuUp } from '@mdi/js'
-import { computed, onBeforeUnmount, onMounted, ref, useCssModule } from 'vue'
+import { computed, getCurrentInstance, onBeforeUnmount, onMounted, ref, useCssModule, warn } from 'vue'
 import NcButton from '../NcButton/NcButton.vue'
 import NcCheckboxRadioSwitch from '../NcCheckboxRadioSwitch/NcCheckboxRadioSwitch.vue'
 import NcIconSvgWrapper from '../NcIconSvgWrapper/NcIconSvgWrapper.vue'
 import NcLoadingIcon from '../NcLoadingIcon/NcLoadingIcon.vue'
 import { t } from '../../l10n.ts'
+import { createElementId } from '../../utils/createElementId.ts'
 
 export type NcTableRowKey = string | number
 
@@ -315,7 +338,7 @@ export interface NcTableColumn {
 	width?: string
 	/** How the column's content is aligned */
 	align?: 'start' | 'center' | 'end'
-	/** A longer explanation, shown as the header's tooltip */
+	/** A longer explanation, shown as the header's tooltip and read out as its description */
 	description?: string
 }
 
@@ -343,7 +366,7 @@ const props = withDefaults(defineProps<{
 	/**
 	 * The rows of the table. Every row needs a unique value under `rowKey`.
 	 */
-	rows: Record<string, unknown>[]
+	rows: Row[]
 
 	/**
 	 * The name of the property that identifies a row.
@@ -355,7 +378,7 @@ const props = withDefaults(defineProps<{
 	/**
 	 * The name of the table for assistive technology. It is not shown.
 	 */
-	caption?: string
+	caption: string
 
 	/**
 	 * Whether the rows are loading. Shows a loading state instead of the rows.
@@ -366,9 +389,15 @@ const props = withDefaults(defineProps<{
 	 * Whether rows can be selected with a checkbox.
 	 */
 	selectable?: boolean
+
+	/**
+	 * Returns the name of a row, used in the label of its checkbox, such as "Select Annual report.md".
+	 * Defaults to the value of the first column.
+	 */
+	rowLabel?: (row: Row) => string
 }>(), {
 	rowKey: 'id',
-	caption: undefined,
+	rowLabel: undefined,
 })
 
 const emit = defineEmits<{
@@ -387,30 +416,31 @@ const emit = defineEmits<{
 	'update:selected': [selected: NcTableRowKey[]]
 
 	/**
-	 * A row was clicked, outside the controls in it.
+	 * A row was clicked, outside the controls in it. Only mouse users can do this,
+	 * so it must not be the only way to reach a row's action.
 	 *
 	 * @param row - The clicked row
 	 * @param event - The click event
 	 */
-	rowClick: [row: Record<string, unknown>, event: MouseEvent]
+	rowClick: [row: Row, event: MouseEvent]
 }>()
 
 const slots = defineSlots<{
 	/**
 	 * The content of the cell of column `<key>`, for example `#cell-status`.
 	 */
-	[key: `cell-${string}`]: Slot<{ row: Record<string, unknown>, value: unknown }>
+	[key: `cell-${string}`]: Slot<{ row: Row, value: unknown }>
 
 	/**
 	 * The content of the header of column `<key>`, for example `#header-status`.
 	 * It replaces the sort button of a sortable column.
 	 */
-	[key: `header-${string}`]: Slot<{ column: NcTableColumn }>
+	[key: `header-${string}`]: Slot<{ column: NcTableColumn, sorted: boolean, sort: NcTableSort | null, toggleSort: () => void }>
 
 	/**
 	 * Actions for a row, for example an `NcActions` menu. Adds a trailing column.
 	 */
-	rowActions?: Slot<{ row: Record<string, unknown> }>
+	rowActions?: Slot<{ row: Row }>
 
 	/**
 	 * What is shown while `loading` is set.
@@ -425,15 +455,34 @@ const slots = defineSlots<{
 
 const style = useCssModule()
 
-const columnCount = computed(() => props.columns.length + (props.selectable ? 1 : 0) + (slots.rowActions ? 1 : 0))
+const idPrefix = 'nc-table-' + createElementId()
 
 /**
- * The key of a row.
+ * The id of the hidden description of a column.
+ *
+ * @param index - The index of the column
+ */
+function descriptionId(index: number): string {
+	return `${idPrefix}-description-${index}`
+}
+
+const columnCount = computed(() => props.columns.length + (props.selectable ? 1 : 0) + (slots.rowActions ? 1 : 0))
+
+let warnedMissingKey = false
+
+/**
+ * The key of a row. Warns once when a row has none, as every row then counts as selected
+ * as soon as one is.
  *
  * @param row - The row
  */
-function keyOf(row: Record<string, unknown>): NcTableRowKey {
-	return row[props.rowKey] as NcTableRowKey
+function keyOf(row: Row): NcTableRowKey {
+	const key = row[props.rowKey] as NcTableRowKey | undefined
+	if (key === undefined && !warnedMissingKey) {
+		warnedMissingKey = true
+		warn(`[NcTable] A row has no "${props.rowKey}". Give every row a unique key, or set \`row-key\` to the property that identifies a row.`)
+	}
+	return key as NcTableRowKey
 }
 
 /**
@@ -442,7 +491,7 @@ function keyOf(row: Record<string, unknown>): NcTableRowKey {
  * @param row - The row
  * @param column - The column
  */
-function valueOf(row: Record<string, unknown>, column: NcTableColumn): unknown {
+function valueOf(row: Row, column: NcTableColumn): unknown {
 	return column.key.split('.').reduce<unknown>((value, part) => (value === null || value === undefined ? undefined : (value as Record<string, unknown>)[part]), row)
 }
 
@@ -549,8 +598,21 @@ const someSelected = computed(() => selectedCount.value > 0 && !allSelected.valu
  *
  * @param row - The row
  */
-function isSelected(row: Record<string, unknown>): boolean {
+function isSelected(row: Row): boolean {
 	return selectedSet.value.has(keyOf(row))
+}
+
+/**
+ * The label of a row's checkbox, naming the row so the checkboxes can be told apart.
+ *
+ * @param row - The row
+ */
+function checkboxLabel(row: Row): string {
+	const firstColumn = props.columns[0]
+	const name = props.rowLabel
+		? props.rowLabel(row)
+		: (firstColumn ? displayValue(valueOf(row, firstColumn)) : '')
+	return name ? t('Select {row}', { row: name }) : t('Select row')
 }
 
 /**
@@ -559,7 +621,7 @@ function isSelected(row: Record<string, unknown>): boolean {
  * @param row - The row
  * @param value - Whether it is selected now
  */
-function toggleRow(row: Record<string, unknown>, value: unknown) {
+function toggleRow(row: Row, value: unknown) {
 	const key = keyOf(row)
 	const others = selected.value.filter((selectedKey) => selectedKey !== key)
 	selected.value = value ? [...others, key] : others
@@ -576,15 +638,30 @@ function toggleAll(value: unknown) {
 	selected.value = value ? [...hidden, ...shown] : hidden
 }
 
+const instance = getCurrentInstance()
+
 /**
- * Report a click on a row, unless it was on a control inside it.
+ * Whether the parent listens to `rowClick`, so the rows show they can be clicked.
+ * Read during the render, so it follows the parent's current listeners.
+ */
+function hasRowClickListener(): boolean {
+	return Boolean(instance?.vnode.props?.onRowClick)
+}
+
+/**
+ * Report a click on a row, unless it was on a control inside it or ended a text selection.
  *
  * @param row - The row
  * @param event - The click event
  */
-function onRowClick(row: Record<string, unknown>, event: MouseEvent) {
+function onRowClick(row: Row, event: MouseEvent) {
 	const target = event.target as Element | null
-	if (target?.closest('a, button, input, select, textarea, label, [role="button"], [role="checkbox"]')) {
+	// A click on a checkbox lands on its visual box, not on the input, so the whole
+	// selection cell counts as a control
+	if (target?.closest(`a, button, input, select, textarea, label, [role="button"], [role="checkbox"], .${style.ncTable__check}`)) {
+		return
+	}
+	if (window.getSelection()?.toString()) {
 		return
 	}
 	emit('rowClick', row, event)
@@ -649,7 +726,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 .ncTable__actions {
 	padding-block: var(--table-cell-padding-block-start, var(--default-grid-baseline)) var(--table-cell-padding-block-end, var(--default-grid-baseline));
 	padding-inline: var(--table-cell-padding-inline-start, calc(2 * var(--default-grid-baseline))) var(--table-cell-padding-inline-end, calc(2 * var(--default-grid-baseline)));
-	border-bottom: 1px solid var(--color-border);
+	border-block-end: 1px solid var(--color-border);
 	line-height: var(--table-cell-line-height, inherit);
 	text-align: start;
 	vertical-align: middle;
@@ -674,15 +751,15 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 // Theming: the header row and the body rows each read their own variables, and
 // every fallback is the value the table has without them
 .ncTable__table > thead > tr > th {
-	border-bottom-color: var(--table-header-border-block-end-color, var(--color-border));
-	border-bottom-width: var(--table-header-border-block-end-width, 1px);
-	border-top: var(--table-header-border-block-start-width, 0) solid var(--table-header-border-block-start-color, transparent);
+	border-block-end-color: var(--table-header-border-block-end-color, var(--color-border));
+	border-block-end-width: var(--table-header-border-block-end-width, 1px);
+	border-block-start: var(--table-header-border-block-start-width, 0) solid var(--table-header-border-block-start-color, transparent);
 	background-color: var(--table-header-background-color, transparent);
 }
 
 .ncTable__table > tbody > tr > td {
-	border-bottom-color: var(--table-row-border-block-end-color, var(--color-border));
-	border-bottom-width: var(--table-row-border-block-end-width, 1px);
+	border-block-end-color: var(--table-row-border-block-end-color, var(--color-border));
+	border-block-end-width: var(--table-row-border-block-end-width, 1px);
 }
 
 // A sortable header is an NcButton, like the sortable headers of the Files app.
@@ -699,7 +776,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 	color: var(--table-header-cell-color, var(--table-header-color, var(--color-text-maxcontrast)));
 
 	&:hover:not(:disabled) {
-		color: var(--color-main-text);
+		color: var(--table-header-hover-color, var(--color-main-text));
 	}
 }
 
@@ -729,10 +806,6 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 	text-align: end;
 }
 
-.ncTable__row > td {
-	background-color: var(--table-row-background-color, transparent);
-}
-
 .ncTable__row:nth-child(odd) > td {
 	background-color: var(--table-row-alternate-odd-background-color, var(--table-row-background-color, transparent));
 }
@@ -752,6 +825,10 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 .ncTable__row:hover > td {
 	background-color: var(--table-row-hover-background-color, var(--color-background-hover));
 	color: var(--table-row-hover-color, var(--table-data-cell-color, var(--color-main-text)));
+}
+
+.ncTable__row_clickable {
+	cursor: pointer;
 }
 
 .ncTable__row.ncTable__row_selected > td {

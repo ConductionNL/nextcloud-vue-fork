@@ -5,7 +5,7 @@
 
 import type { NcTabsTab } from '../../../../src/components/NcTabs/NcTabs.vue'
 
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { nextTick } from 'vue'
 import NcTabs from '../../../../src/components/NcTabs/NcTabs.vue'
@@ -29,12 +29,13 @@ const slots = {
  * @param modelValue - The selected tab id
  */
 function mountTabs(modelValue?: string) {
+	// A model that does not match an enabled tab is replaced while mounting, before `wrapper` is assigned
 	const wrapper = mount(NcTabs, {
 		props: {
 			tabs,
 			modelValue,
 			ariaLabel: 'Document',
-			'onUpdate:modelValue': (id: unknown) => wrapper.setProps({ modelValue: id as string }),
+			'onUpdate:modelValue': (id: unknown) => Promise.resolve().then(() => wrapper.setProps({ modelValue: id as string })),
 		},
 		slots,
 		attachTo: document.body,
@@ -68,6 +69,51 @@ describe('NcTabs', () => {
 		const wrapper = mountTabs('unknown')
 		expect(wrapper.get('[aria-selected="true"]').text()).toBe('Details')
 		expect(wrapper.get('[role="tabpanel"]').text()).toBe('Details panel')
+		wrapper.unmount()
+	})
+
+	it.each([
+		['an unknown tab', 'unknown'],
+		['a disabled tab', 'history'],
+		['no tab', undefined],
+	])('makes the shown tab the model when the model is %s', (_, modelValue) => {
+		const wrapper = mount(NcTabs, { props: { tabs, modelValue }, slots })
+		expect(wrapper.emitted('update:modelValue')).toEqual([['details']])
+		wrapper.unmount()
+	})
+
+	it('makes the shown tab the model when the selected tab is removed', async () => {
+		const wrapper = mountTabs('comments')
+		await wrapper.setProps({ tabs: tabs.filter((tab) => tab.id !== 'comments') })
+		await flushPromises()
+		expect(wrapper.emitted('update:modelValue')).toEqual([['details']])
+		expect(wrapper.get('[aria-selected="true"]').text()).toBe('Details')
+		wrapper.unmount()
+	})
+
+	it('does not change a model that matches an enabled tab', () => {
+		const wrapper = mountTabs('sharing')
+		expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+		wrapper.unmount()
+	})
+
+	it('keeps the tab and its panel linked when the tab id has whitespace', () => {
+		const wrapper = mount(NcTabs, {
+			props: { tabs: [{ id: 'my tab', name: 'Mine' }], modelValue: 'my tab' },
+			slots: { 'panel-my tab': '<p>My panel</p>' },
+		})
+		const tab = wrapper.get('[role="tab"]')
+		const panel = wrapper.get('[role="tabpanel"]')
+		expect(tab.attributes('id')).not.toMatch(/\s/)
+		expect(tab.attributes('aria-controls')).toBe(panel.attributes('id'))
+		expect(panel.attributes('aria-labelledby')).toBe(tab.attributes('id'))
+		expect(panel.text()).toBe('My panel')
+		wrapper.unmount()
+	})
+
+	it('can name the tablist by another element', () => {
+		const wrapper = mount(NcTabs, { props: { tabs, modelValue: 'details', ariaLabelledby: 'heading' }, slots })
+		expect(wrapper.get('[role="tablist"]').attributes('aria-labelledby')).toBe('heading')
 		wrapper.unmount()
 	})
 

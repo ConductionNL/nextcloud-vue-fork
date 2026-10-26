@@ -78,7 +78,7 @@ export default {
 | `--page-header-heading-font-family` | Font of the heading. Inherited by default. |
 | `--page-header-heading-font-size` | Font size of the heading. Defaults to `30px`. |
 | `--page-header-heading-font-weight` | Font weight of the heading. Defaults to `600`. |
-| `--page-header-heading-line-height` | Line height of the heading. Defaults to `1.5`. |
+| `--page-header-heading-line-height` | Line height of the heading, as a number without a unit, so the icon and the actions can be centered on the heading's first line. Defaults to `1.5`. |
 | `--page-header-description-color` | Color of the description. Defaults to `--color-text-maxcontrast`. |
 | `--page-header-description-font-size` | Font size of the description. Inherited by default. |
 | `--page-header-heading-margin-block-start` | Space above the heading. Defaults to `0`. |
@@ -141,18 +141,21 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 
 <template>
 	<header :class="$style.ncPageHeader">
-		<div v-if="slots.icon || iconPath" :class="$style.ncPageHeader__icon">
-			<slot name="icon">
-				<NcIconSvgWrapper :path="iconPath" :size="32" />
-			</slot>
-		</div>
-		<div :class="$style.ncPageHeader__text">
-			<component :is="headingTag" :class="$style.ncPageHeader__heading">
-				{{ name }}
-			</component>
-			<p v-if="description" :class="$style.ncPageHeader__description">
-				{{ description }}
-			</p>
+		<!-- The icon and the text never wrap apart; only the actions move to a row of their own -->
+		<div :class="$style.ncPageHeader__main">
+			<div v-if="slots.icon || iconPath" :class="$style.ncPageHeader__icon">
+				<slot name="icon">
+					<NcIconSvgWrapper :path="iconPath" :size="32" />
+				</slot>
+			</div>
+			<div :class="$style.ncPageHeader__text">
+				<component :is="headingTag" :class="$style.ncPageHeader__heading">
+					{{ name }}
+				</component>
+				<p v-if="description" :class="$style.ncPageHeader__description">
+					{{ description }}
+				</p>
+			</div>
 		</div>
 		<div v-if="slots.actions" :class="$style.ncPageHeader__actions">
 			<slot name="actions" />
@@ -169,21 +172,30 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 	margin-block-end: var(--page-header-margin-block-end, calc(4 * var(--default-grid-baseline)));
 }
 
+.ncPageHeader__main {
+	display: flex;
+	flex: 1 1 16rem;
+	align-items: flex-start;
+	gap: var(--page-header-gap, calc(3 * var(--default-grid-baseline)));
+	min-width: 0;
+}
+
 .ncPageHeader__icon {
 	display: flex;
 	flex-shrink: 0;
 	align-items: center;
 	justify-content: center;
-	min-height: var(--default-clickable-area);
+	// As tall as the heading's first line, so the icon is centered on it
+	min-height: calc(var(--page-header-heading-font-size, 30px) * var(--page-header-heading-line-height, 1.5));
 	color: var(--page-header-icon-color, var(--color-primary-element));
 }
 
 .ncPageHeader__text {
-	flex: 1 1 auto;
+	flex: 1 1 0;
 	min-width: 0;
-	align-self: center;
 }
 
+// The defaults are those of an h2 in the server's core/css/apps.scss, which has no variables for them
 .ncPageHeader__heading {
 	margin-block: var(--page-header-heading-margin-block-start, 0) var(--page-header-heading-margin-block-end, 0);
 	margin-inline: 0;
@@ -209,6 +221,7 @@ const headingTag = computed(() => `h${Math.min(6, Math.max(2, props.headingLevel
 	flex-wrap: wrap;
 	align-items: center;
 	gap: var(--default-grid-baseline);
-	min-height: var(--default-clickable-area);
+	// As tall as the heading's first line, so the actions are centered on it
+	min-height: calc(var(--page-header-heading-font-size, 30px) * var(--page-header-heading-line-height, 1.5));
 }
 </style>

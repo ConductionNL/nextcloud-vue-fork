@@ -297,9 +297,6 @@ msgstr ""
 msgid "Local time: {time}"
 msgstr ""
 
-msgid "Locked"
-msgstr ""
-
 msgid "Locked by {user}"
 msgstr ""
 
@@ -533,6 +530,9 @@ msgstr ""
 msgid "seconds ago"
 msgstr ""
 
+msgid "Select {row}"
+msgstr ""
+
 msgid "Select a tag"
 msgstr ""
 
@@ -660,6 +660,9 @@ msgid "Undo changes"
 msgstr ""
 
 msgid "Unlock"
+msgstr ""
+
+msgid "Unlocking …"
 msgstr ""
 
 msgid "Upload file"

@@ -327,15 +327,14 @@ export default {
 			height: var(--breadcrumbs-separator-icon-size, 20px);
 		}
 	}
-	// Necessary for indicating hovering for drag and drop
-	&#{&}--hovered :deep(.button-vue) {
-		background-color: var(--color-background-dark);
-		color: var(--color-main-text);
+	// The background of a link, without raising the specificity, so the drag over state
+	// below wins. Not on the overflow menu, so it keeps the background it has when open.
+	&:where(:not(:last-child, .dropdown)) :deep() .button-vue {
+		background-color: var(--breadcrumbs-link-background-color, transparent);
 	}
 	// Adjust button style
 	&:not(:last-child) :deep() .button-vue {
 		color: var(--breadcrumbs-link-color, var(--color-text-maxcontrast));
-		background-color: var(--breadcrumbs-link-background-color, transparent);
 		text-decoration: var(--breadcrumbs-link-text-decoration, none);
 
 		&:hover {
@@ -369,6 +368,12 @@ export default {
 		margin: 0;
 		// On the text, which inherits from a button and a link alike
 		line-height: var(--breadcrumbs-line-height, inherit);
+	}
+	// Necessary for indicating hovering for drag and drop. After the button style, and as
+	// specific, so it wins over the colors of a link and of the current location.
+	&#{&}--hovered :deep(.button-vue) {
+		background-color: var(--color-background-dark);
+		color: var(--color-main-text);
 	}
 
 	// Adjust action item appearance for crumbs with actions

@@ -70,6 +70,22 @@ describe('NcCard', () => {
 		expect(link.text()).toBe('Design')
 	})
 
+	it('keeps the aria-current of a router link to the current route', async () => {
+		const router = createRouter({
+			history: createWebHashHistory(),
+			routes: [
+				{ path: '/', name: 'root', component: { template: '<div />' } },
+				{ path: '/teams/:id', name: 'team', component: { template: '<div />' } },
+			],
+		})
+		await router.push({ name: 'team', params: { id: 'design' } })
+		const wrapper = mount(NcCard, {
+			props: { name: 'Design', to: { name: 'team', params: { id: 'design' } } },
+			global: { plugins: [router] },
+		})
+		expect(wrapper.get('h3 a').attributes('aria-current')).toBe('page')
+	})
+
 	it('turns the heading into a router link when to is set and a router is available', async () => {
 		const router = createRouter({
 			history: createWebHashHistory(),
@@ -84,6 +100,21 @@ describe('NcCard', () => {
 		})
 		await router.isReady()
 		expect(wrapper.get('h3 a').attributes('href')).toBe('#/teams/design')
+	})
+
+	it('opens the link in the target, without access to this page', () => {
+		const wrapper = mount(NcCard, { props: { name: 'Design', href: 'https://example.com', target: '_blank' } })
+		const link = wrapper.get('h3 a')
+		expect(link.attributes('target')).toBe('_blank')
+		expect(link.attributes('rel')).toBe('nofollow noreferrer noopener')
+	})
+
+	it('marks the link of an active card as the current one', () => {
+		const inactive = mount(NcCard, { props: { name: 'Design', href: '/teams/design' } })
+		expect(inactive.get('h3 a').attributes('aria-current')).toBeUndefined()
+
+		const active = mount(NcCard, { props: { name: 'Design', href: '/teams/design', active: true } })
+		expect(active.get('h3 a').attributes('aria-current')).toBe('true')
 	})
 
 	it('falls back to href when to is set without a router', () => {

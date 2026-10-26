@@ -10,7 +10,7 @@ This component renders a card: a bordered box with a heading, an optional icon i
 
 The heading is an `h3` by default, one level below the `h2` of a page header. Set `heading-level` to the level that fits where the cards are shown.
 
-With `href` or `to` the heading becomes a link that covers the whole card, so the whole card can be clicked, while it is announced to assistive technology as a single link with the name of the card. Buttons and other controls in the `actions` slot and the content stay clickable on their own. The `active` prop highlights a card, for example the selected one.
+With `href` or `to` the heading becomes a link that covers the whole card, so the whole card can be clicked, while it is announced to assistive technology as a single link with the name of the card. Set `target` to open it in another tab or window. Links, buttons and other controls in the `actions` slot, the content and the footer stay clickable on their own. As the rest of the content is part of the link, its text cannot be selected. The `active` prop highlights a card, for example the selected one, and marks its link as the current one for assistive technology.
 
 ### Usage
 
@@ -76,7 +76,7 @@ export default {
 			:description="team.description"
 			:icon-path="mdiAccountGroupOutline"
 			:active="team.id === selected"
-			href="#"
+			:href="'/apps/teams/' + team.id"
 			@click.prevent="selected = team.id" />
 	</div>
 </template>
@@ -192,12 +192,18 @@ const props = withDefaults(defineProps<{
 	 * Takes precedence over `href`.
 	 */
 	to?: RouteLocationRaw
+
+	/**
+	 * Where the `href` link opens, for example `_blank` for a new tab.
+	 */
+	target?: string
 }>(), {
 	description: undefined,
 	iconPath: undefined,
 	headingLevel: 3,
 	href: undefined,
 	to: undefined,
+	target: undefined,
 })
 
 const slots = defineSlots<{
@@ -234,7 +240,16 @@ const linkTag = computed(() => {
 	return props.href ? 'a' : undefined
 })
 
-const linkAttrs = computed(() => linkTag.value === 'RouterLink' ? { to: props.to } : { href: props.href })
+const linkAttrs = computed(() => {
+	// Only when active: an `aria-current` key without a value would also remove the one
+	// RouterLink sets itself on a link to the current route
+	const current = props.active ? { 'aria-current': 'true' } : {}
+	if (linkTag.value === 'RouterLink') {
+		return { to: props.to, ...current }
+	}
+	// Like NcButton, so a page opened in a new tab gets no access to this one
+	return { href: props.href, target: props.target, rel: 'nofollow noreferrer noopener', ...current }
+})
 </script>
 
 <template>
@@ -314,6 +329,15 @@ const linkAttrs = computed(() => linkTag.value === 'RouterLink' ? { to: props.to
 	}
 }
 
+// Forced colors replace the border color and drop the shadow, so mark the active card with
+// a thicker border in the system highlight color
+@media (forced-colors: active) {
+	.ncCard_active {
+		border-color: Highlight;
+		outline: 1px solid Highlight;
+	}
+}
+
 .ncCard__header {
 	display: flex;
 	align-items: center;
@@ -353,7 +377,7 @@ const linkAttrs = computed(() => linkTag.value === 'RouterLink' ? { to: props.to
 		content: '';
 		position: absolute;
 		inset: 0;
-		border-radius: inherit;
+		border-radius: var(--card-border-radius, var(--border-radius-large));
 	}
 
 	&:focus-visible {
@@ -361,10 +385,11 @@ const linkAttrs = computed(() => linkTag.value === 'RouterLink' ? { to: props.to
 	}
 }
 
+// Above the link that covers the card, so they stay clickable on their own. Only the
+// controls in the content and the footer, so the rest of them still follows the link.
 .ncCard__actions,
-.ncCard__content,
-.ncCard__footer {
-	// Above the link that covers the card, so their controls stay clickable on their own
+.ncCard__content :is(a, button, input, select, textarea, summary, [tabindex]),
+.ncCard__footer :is(a, button, input, select, textarea, summary, [tabindex]) {
 	position: relative;
 	z-index: 1;
 }
