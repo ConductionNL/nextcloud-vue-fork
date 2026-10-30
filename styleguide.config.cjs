@@ -213,7 +213,8 @@ module.exports = async () => {
 					'src/components/NcSettings*/*.vue',
 					'src/components/NcTextArea/*.vue',
 					'src/components/NcUserBubble/NcUserBubbleDiv.vue',
-					'src/components/NcFormBox/NcFormBoxItem.vue',
+					'src/components/NcFormBox*/*.vue',
+					'src/components/NcFormGroup/NcFormGroup.vue',
 					'src/components/NcIconToggleSwitch/NcIconToggleSwitch.vue',
 				],
 				sections: [
@@ -297,6 +298,15 @@ module.exports = async () => {
 						],
 					},
 					{
+						name: 'NcFormBox',
+						components: [
+							// Put FormBox component first
+							'src/components/NcFormBox/NcFormBox.vue',
+							'src/components/NcFormBox[A-Z]*/*.vue',
+							'src/components/NcFormGroup/NcFormGroup.vue',
+						],
+					},
+					{
 						name: 'NcHeader',
 						components: [
 							'src/components/NcHeader*/*.vue',
@@ -345,6 +355,11 @@ module.exports = async () => {
 		ribbon: {
 			text: 'Fork me on GitHub',
 			url: 'https://github.com/nextcloud-libraries/nextcloud-vue',
+		},
+
+		styleguideComponents: {
+			// Its own name, so it no longer shares a cached stylesheet with the props table
+			'Markdown/Table/TableRenderer$': path.join(__dirname, 'styleguide/components/MarkdownTableRenderer.js'),
 		},
 
 		// see https://github.com/styleguidist/react-styleguidist/blob/master/src/client/styles/theme.js
