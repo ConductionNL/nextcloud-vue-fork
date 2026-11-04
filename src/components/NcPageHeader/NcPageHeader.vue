@@ -6,11 +6,9 @@
 <docs>
 ### General description
 
-This component renders the header at the top of a page in the app content: a heading with an optional icon in front of it, an optional description below it and optional actions at the end of the row.
+This component shows the header at the top of a page in the app content: a heading with an optional icon, a description and actions.
 
-The heading is an `h2` by default, because the Nextcloud page layout already has the `h1`. To set the text of that `h1`, use the `page-heading` prop of `NcAppContent`. If the page header is nested deeper, set `heading-level` to the level that fits. The level only changes the element, not the look: the heading always has the size of a Nextcloud app's `h2`.
-
-The actions wrap below the heading when there is not enough room next to it.
+The heading is an `h2`, because the page layout already has the `h1`. Set the text of that `h1` with the `page-heading` prop of `NcAppContent`.
 
 ### Usage
 
@@ -94,6 +92,7 @@ const props = withDefaults(defineProps<{
 	/**
 	 * The level of the heading, from 2 to 6.
 	 * Level 1 is not allowed, because the Nextcloud page layout already has the `h1`.
+	 * The level only changes the element, not the look: the heading always has the size of an `h2`.
 	 */
 	headingLevel?: 2 | 3 | 4 | 5 | 6
 }>(), {
