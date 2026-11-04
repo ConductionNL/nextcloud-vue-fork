@@ -6,11 +6,9 @@
 <docs>
 ### General description
 
-This component renders a padlock that says an item is locked, for example in a list, a table row or a card. Its accessible name says who holds the lock.
+This component shows a padlock that says an item is locked, for example in a list or a card. It only shows the lock and does not stop anyone from opening the item, so render it only for a locked item.
 
-A lock held by someone else is shown in the warning color, because the item cannot be edited now. A lock the current user holds is shown in a neutral color, because it is no obstacle to them. With `show-label` the padlock is followed by who holds the lock, such as "Locked by Jane Doe". Without it, who holds the lock is only shown in a tooltip on mouse hover, which keyboard and touch users cannot reach, so then show it elsewhere, for example where the item is opened.
-
-The component only shows the lock; it does not stop anyone from opening the item. Render it only for a locked item, for example with `v-if`.
+Without `show-label`, who holds the lock is only shown in a tooltip, which keyboard and touch users cannot reach, so then show it elsewhere as well.
 
 ### Usage
 
