@@ -6,11 +6,7 @@
 <docs>
 ### General description
 
-This component renders a row of quick filters above a list or a table, such as "Mine", "Open" and "Overdue". Each filter is a toggle button drawn as a pill, and the selected one is filled with the primary color. A filter can have an icon and a count, for example the number of items it matches.
-
-Pass the filters in `filters` and bind the `id` of the selected filter with `v-model`. A click on the selected filter clears the selection again. With `multiple`, several filters can be selected at once and `v-model` holds an array of ids.
-
-The component does not filter anything itself: filter the items by the selected ids. The filters are a group of toggle buttons with an accessible name, "Quick filters" unless `aria-label` is set. When the filters do not fit on one line, they wrap.
+This component shows a row of quick filters above a list or a table, such as "Mine", "Open" and "Overdue". It does not filter anything itself: filter the items by the selected ids.
 
 ### Usage
 
@@ -91,7 +87,7 @@ export interface NcQuickFilterBarFilter {
 
 /**
  * The `id` of the selected filter, or `null` when none is selected.
- * With `multiple`, an array of the ids of the selected filters.
+ * With `multiple`, an array of the ids of the selected filters. A click on a selected filter clears it.
  */
 const modelValue = defineModel<string | string[] | null>({ default: null })
 
