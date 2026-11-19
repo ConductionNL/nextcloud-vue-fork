@@ -99,6 +99,29 @@ module.exports = async () => {
 				usageMode: 'hide',
 			},
 			{
+				// Preview branch only (preview/all-components): the Conduction components
+				// in one place for review. They also stay in their usual place under Components.
+				name: 'Conduction components',
+				content: 'docs/conduction-components.md',
+				sectionDepth: 1,
+				components: [
+					'src/components/NcBreadcrumbs/NcBreadcrumbs.vue',
+					'src/components/NcCard/NcCard.vue',
+					'src/components/NcChip/NcChip.vue',
+					'src/components/NcDateTimePicker/NcDateTimePicker.vue',
+					'src/components/NcIconPicker/NcIconPicker.vue',
+					'src/components/NcLockIndicator/NcLockIndicator.vue',
+					'src/components/NcNoteCard/NcNoteCard.vue',
+					'src/components/NcPageHeader/NcPageHeader.vue',
+					'src/components/NcPagination/NcPagination.vue',
+					'src/components/NcQuickFilterBar/NcQuickFilterBar.vue',
+					'src/components/NcStatsBlock/NcStatsBlock.vue',
+					'src/components/NcStepper/NcStepper.vue',
+					'src/components/NcTable/NcTable.vue',
+					'src/components/NcTabs/NcTabs.vue',
+				],
+			},
+			{
 				name: 'Versions',
 				sections: [
 					{
@@ -355,6 +378,11 @@ module.exports = async () => {
 		ribbon: {
 			text: 'Fork me on GitHub',
 			url: 'https://github.com/nextcloud-libraries/nextcloud-vue',
+		},
+
+		styleguideComponents: {
+			// Its own name, so it no longer shares a cached stylesheet with the props table
+			'Markdown/Table/TableRenderer$': path.join(__dirname, 'styleguide/components/MarkdownTableRenderer.js'),
 		},
 
 		// see https://github.com/styleguidist/react-styleguidist/blob/master/src/client/styles/theme.js
