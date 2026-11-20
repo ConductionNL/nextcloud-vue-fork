@@ -104,6 +104,19 @@ describe('useFormatRelativeTime composable', () => {
 		expect(formatted.value).toBe('2 minutes ago')
 	})
 
+	it('keeps one pending update when the timestamp changes', async () => {
+		const timestamp = ref(time)
+		const formatted = useFormatRelativeTime(timestamp)
+		expect(vi.getTimerCount()).toBe(1)
+
+		timestamp.value = time + 1000
+		await nextTick()
+		timestamp.value = time + 2000
+		await nextTick()
+		expect(formatted.value).toBe('58 seconds ago')
+		expect(vi.getTimerCount()).toBe(1)
+	})
+
 	it('handles a timestamp becoming invalid', async () => {
 		const timestamp = ref(time)
 		const formatted = useFormatRelativeTime(timestamp)

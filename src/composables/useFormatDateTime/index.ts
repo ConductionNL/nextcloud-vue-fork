@@ -87,6 +87,9 @@ export function useFormatRelativeTime(
 	 * This is the callback for the interval.
 	 */
 	function updateRelativeTime() {
+		// A new timestamp or new options also run this, so drop the pending update first,
+		// or every change would start another chain of timeouts
+		window.clearTimeout(timeoutId)
 		const timestamp = date.value.getTime()
 		if (Number.isNaN(timestamp)) {
 			// likely parsed "Date" from "Infinity" or "NaN"
