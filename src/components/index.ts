@@ -99,6 +99,7 @@ export { default as NcSettingsSelectGroup } from './NcSettingsSelectGroup/index.
 export { default as NcStepper } from './NcStepper/index.ts'
 export { default as NcTable } from './NcTable/index.ts'
 export { default as NcStatsBlock } from './NcStatsBlock/index.ts'
+export { default as NcTabs } from './NcTabs/index.ts'
 export { default as NcTextArea } from './NcTextArea/index.ts'
 export { default as NcTextField } from './NcTextField/index.ts'
 export { default as NcThemeProvider } from './NcThemeProvider/index.ts'
